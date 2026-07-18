@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  /* Goodson design tokens */
+  --ink: #1E2A3A;        /* Indigo Night - primary dark, hero/nav */
+  --ink-soft: #2C3B4E;   /* lighter ink for cards on dark */
+  --linen: #F5F1E8;      /* warm light background for content sections */
+  --paper: #FBF9F4;      /* lightest surface */
+  --marigold: #D9A441;   /* single warm accent - CTAs, highlights */
+  --marigold-deep: #B9832E;
+  --rose-ash: #B76E6E;   /* secondary accent - used sparingly (alerts/badges) */
+  --slate: #5B6B75;      /* secondary text on light */
+  --slate-on-dark: #A9B7C4; /* secondary text on dark */
+  --line: #DDD5C4;       /* hairline borders on light */
+  --line-dark: #3A4A5C;  /* hairline borders on dark */
+  --charcoal: #23211D;   /* body text on light */
+
+  --background: var(--paper);
+  --foreground: var(--charcoal);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-linen: var(--linen);
+  --color-paper: var(--paper);
+  --color-marigold: var(--marigold);
+  --color-marigold-deep: var(--marigold-deep);
+  --color-rose-ash: var(--rose-ash);
+  --color-slate: var(--slate);
+  --color-slate-dark: var(--slate-on-dark);
+  --color-line: var(--line);
+  --color-line-dark: var(--line-dark);
+  --color-charcoal: var(--charcoal);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--marigold);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--marigold);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Signature: the bridge pulse - a slow travelling glow used behind the
+   dual-clock element in the hero, evoking a signal crossing the distance
+   between an NRI abroad and their parents in India. */
+@keyframes bridge-pulse {
+  0% { stroke-dashoffset: 240; opacity: 0.25; }
+  50% { opacity: 0.9; }
+  100% { stroke-dashoffset: 0; opacity: 0.25; }
+}
+
+.bridge-line {
+  stroke-dasharray: 6 10;
+  animation: bridge-pulse 3.2s linear infinite;
+}
