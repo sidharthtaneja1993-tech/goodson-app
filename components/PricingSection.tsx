@@ -109,7 +109,7 @@ export default function PricingSection({
             Plans
           </span>
         </div>
-        <h2 className="font-display max-w-xl text-4xl leading-tight text-ink sm:text-5xl">
+        <h2 className="font-display max-w-xl text-4xl leading-tight tracking-tight text-ink sm:text-5xl">
           Choose the level of presence your family needs
         </h2>
 
@@ -150,7 +150,7 @@ export default function PricingSection({
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`flex flex-col rounded-2xl border p-8 ${
+              className={`flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
                 plan.featured
                   ? "border-ink bg-ink text-paper shadow-xl"
                   : "border-line bg-paper text-charcoal"

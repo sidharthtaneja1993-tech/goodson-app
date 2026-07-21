@@ -1,3 +1,5 @@
+import FadeIn from "@/components/FadeIn";
+
 const SERVICES = [
   {
     title: "Medical coordination",
@@ -28,24 +30,30 @@ const SERVICES = [
 
 export default function ServicesSection() {
   return (
-    <section className="bg-ink px-6 py-24 text-paper sm:px-10">
+    <section className="bg-ink px-6 py-28 text-paper sm:px-10">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="h-px w-8 bg-marigold" />
-          <span className="font-mono text-xs uppercase tracking-widest text-slate-dark">
-            What we handle
-          </span>
-        </div>
-        <h2 className="font-display max-w-xl text-4xl leading-tight sm:text-5xl">
-          Everything that usually falls through the cracks from a distance
-        </h2>
+        <FadeIn>
+          <div className="mb-4 flex items-center gap-3">
+            <span className="h-px w-8 bg-marigold" />
+            <span className="font-mono text-xs uppercase tracking-widest text-slate-dark">
+              What we handle
+            </span>
+          </div>
+          <h2 className="font-display max-w-xl text-4xl leading-tight tracking-tight sm:text-5xl">
+            Everything that usually falls through the cracks from a distance
+          </h2>
+        </FadeIn>
 
-        <div className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map((s) => (
-            <div key={s.title} className="border-t border-line-dark pt-5">
-              <h3 className="font-display text-xl">{s.title}</h3>
-              <p className="mt-2 text-sm text-slate-dark">{s.detail}</p>
-            </div>
+        <div className="mt-16 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICES.map((s, i) => (
+            <FadeIn key={s.title} delay={i * 60}>
+              <div className="group border-t border-line-dark py-6 transition-colors duration-300 hover:border-marigold">
+                <h3 className="font-display text-xl transition-transform duration-300 group-hover:translate-x-1">
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-dark">{s.detail}</p>
+              </div>
+            </FadeIn>
           ))}
         </div>
       </div>
