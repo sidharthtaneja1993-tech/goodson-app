@@ -27,21 +27,21 @@ export default function Home() {
 
   return (
     <main>
-      <section className="relative overflow-hidden bg-ink px-6 pb-24 pt-32 text-paper sm:px-10 sm:pt-40">
+      <section className="relative overflow-hidden bg-linen px-6 pb-24 pt-32 text-charcoal sm:px-10 sm:pt-40">
         <Header />
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <FadeIn>
               <div className="mb-6 flex items-center gap-3">
-                <span className="h-px w-8 bg-marigold" />
-                <span className="font-mono text-xs uppercase tracking-widest text-slate-dark">
+                <span className="h-px w-8 bg-marigold-deep" />
+                <span className="font-mono text-xs uppercase tracking-widest text-slate">
                   For families abroad
                 </span>
               </div>
-              <h1 className="font-display max-w-xl text-5xl leading-[1.05] tracking-tight sm:text-6xl lg:text-6xl">
+              <h1 className="font-display max-w-xl text-5xl leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-6xl">
                 Someone dependable, on the ground, for your parents in India.
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-dark">
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate">
                 Goodson coordinates medical care, home management, and daily
                 errands for elderly parents - so distance stops being the
                 thing you worry about.
@@ -56,7 +56,7 @@ export default function Home() {
                 </button>
                 <a
                   href="#plans"
-                  className="rounded-full border border-line-dark px-6 py-3.5 text-sm font-semibold text-paper transition-colors duration-200 hover:border-paper"
+                  className="rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
                 >
                   See plans
                 </a>
@@ -65,7 +65,7 @@ export default function Home() {
 
             <FadeIn delay={150}>
               <div className="relative">
-                <div className="overflow-hidden rounded-2xl border border-line-dark shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
+                <div className="overflow-hidden rounded-2xl border border-line shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
                   <Image
                     src="/hero-team.png"
                     alt="A Goodson caregiver visiting with an elderly couple at home"
@@ -80,7 +80,7 @@ export default function Home() {
           </div>
 
           <FadeIn delay={250}>
-            <div className="mt-16 rounded-2xl border border-line-dark bg-ink-soft p-8 sm:inline-flex">
+            <div className="mt-16 rounded-2xl border border-line bg-ink p-8 text-paper sm:inline-flex">
               <DualClock />
             </div>
           </FadeIn>

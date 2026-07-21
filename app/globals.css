@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  /* Goodson design tokens */
-  --ink: #1E2A3A;        /* Indigo Night - primary dark, hero/nav */
-  --ink-soft: #2C3B4E;   /* lighter ink for cards on dark */
-  --linen: #F5F1E8;      /* warm light background for content sections */
-  --paper: #FBF9F4;      /* lightest surface */
-  --marigold: #D9A441;   /* single warm accent - CTAs, highlights */
-  --marigold-deep: #B9832E;
-  --rose-ash: #B76E6E;   /* secondary accent - used sparingly (alerts/badges) */
-  --slate: #5B6B75;      /* secondary text on light */
-  --slate-on-dark: #A9B7C4; /* secondary text on dark */
-  --line: #DDD5C4;       /* hairline borders on light */
-  --line-dark: #3A4A5C;  /* hairline borders on dark */
-  --charcoal: #23211D;   /* body text on light */
+  /* Goodson design tokens - cream & antique gold palette */
+  --ink: #3A2E22;        /* Espresso - primary dark, hero/nav/footer */
+  --ink-soft: #4A3C2C;   /* lighter espresso for cards on dark */
+  --linen: #F1E4CC;      /* deeper warm cream for alternating sections */
+  --paper: #FBF5E9;      /* lightest cream surface */
+  --marigold: #C9A227;   /* antique gold - CTAs, highlights */
+  --marigold-deep: #A9841D;
+  --rose-ash: #B5651D;   /* clay/terracotta accent - used sparingly (alerts/badges) */
+  --slate: #7A6A50;      /* secondary text on light (warm taupe) */
+  --slate-on-dark: #CBB98F; /* secondary text on dark */
+  --line: #E3D3B0;       /* hairline borders on light */
+  --line-dark: #5C4A34;  /* hairline borders on dark */
+  --charcoal: #2E2418;   /* body text on light */
 
   --background: var(--paper);
   --foreground: var(--charcoal);
