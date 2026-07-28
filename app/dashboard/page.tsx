@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import ParentProfileForm from "@/components/ParentProfileForm";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -53,6 +54,8 @@ export default async function DashboardPage() {
             </p>
           )}
         </div>
+
+        <ParentProfileForm userId={user.id} />
 
         {profile?.is_admin && (
           <div className="mt-6 rounded-2xl border border-marigold-deep bg-paper p-6">

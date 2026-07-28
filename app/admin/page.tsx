@@ -32,6 +32,14 @@ export default async function AdminPage() {
     .order("created_at", { ascending: false })
     .limit(200);
 
+  const { data: parents } = await supabase
+    .from("parents")
+    .select(
+      "id, full_name, age, phone, city, pincode, medical_notes, created_at, profiles(full_name)"
+    )
+    .order("created_at", { ascending: false })
+    .limit(200);
+
   return (
     <main className="min-h-screen bg-linen px-6 py-16 sm:px-10">
       <div className="mx-auto max-w-6xl">
@@ -123,6 +131,57 @@ export default async function AdminPage() {
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-slate">
                       No customer accounts yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-display text-xl text-ink">
+            Parents on file ({parents?.length ?? 0})
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-paper">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-line text-xs uppercase tracking-wide text-slate">
+                  <th className="px-4 py-3">Parent</th>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Phone</th>
+                  <th className="px-4 py-3">Location</th>
+                  <th className="px-4 py-3">Medical notes</th>
+                  <th className="px-4 py-3">Added</th>
+                </tr>
+              </thead>
+              <tbody>
+                {parents?.map((p) => (
+                  <tr key={p.id} className="border-b border-line last:border-0 align-top">
+                    <td className="px-4 py-3">
+                      {p.full_name}
+                      {p.age ? `, ${p.age}` : ""}
+                    </td>
+                    <td className="px-4 py-3">
+                      {(p.profiles as unknown as { full_name: string | null } | null)
+                        ?.full_name || "—"}
+                    </td>
+                    <td className="px-4 py-3">{p.phone || "—"}</td>
+                    <td className="px-4 py-3">
+                      {[p.city, p.pincode].filter(Boolean).join(" · ") || "—"}
+                    </td>
+                    <td className="px-4 py-3 max-w-xs whitespace-pre-wrap text-slate">
+                      {p.medical_notes || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-slate">
+                      {new Date(p.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+                {!parents?.length && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-6 text-center text-slate">
+                      No parent details added yet.
                     </td>
                   </tr>
                 )}
