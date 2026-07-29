@@ -19,7 +19,7 @@ export default function Home() {
     "monthly"
   );
 
-  function openWaitlist(plan: string | null, cycle: "monthly" | "annual" = "monthly") {
+  function openGetStarted(plan: string | null, cycle: "monthly" | "annual" = "monthly") {
     setSelectedPlan(plan);
     setSelectedCycle(cycle);
     setModalOpen(true);
@@ -49,10 +49,10 @@ export default function Home() {
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <button
-                  onClick={() => openWaitlist(null)}
+                  onClick={() => openGetStarted(null)}
                   className="rounded-full bg-marigold px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-marigold/20"
                 >
-                  Join the waitlist
+                  Get started
                 </button>
                 <a
                   href="#plans"
@@ -89,7 +89,7 @@ export default function Home() {
 
       <ServicesSection />
       <TestimonialsSection />
-      <PricingSection onSelectPlan={(plan, cycle) => openWaitlist(plan, cycle)} />
+      <PricingSection onSelectPlan={(plan, cycle) => openGetStarted(plan, cycle)} />
       <PinChecker />
 
       <section className="px-6 py-28 sm:px-10">
@@ -99,13 +99,13 @@ export default function Home() {
               Ready when you are
             </h2>
             <p className="mt-4 text-slate">
-              Join the waitlist and we&apos;ll reach out on WhatsApp to set things up.
+              Get started and we&apos;ll reach out on WhatsApp to set things up.
             </p>
             <button
-              onClick={() => openWaitlist(null)}
+              onClick={() => openGetStarted(null)}
               className="mt-8 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink/20"
             >
-              Join the waitlist
+              Get started
             </button>
           </div>
         </FadeIn>

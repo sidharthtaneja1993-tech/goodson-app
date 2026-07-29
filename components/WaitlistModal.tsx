@@ -62,7 +62,7 @@ export default function WaitlistModal({
       >
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h3 className="font-display text-2xl text-ink">Join the waitlist</h3>
+            <h3 className="font-display text-2xl text-ink">Get started</h3>
             {plan && (
               <p className="mt-1 text-sm text-slate">
                 Plan: <span className="capitalize font-medium">{plan}</span> ·{" "}
@@ -81,9 +81,10 @@ export default function WaitlistModal({
 
         {state === "done" ? (
           <div className="py-6 text-center">
-            <p className="font-display text-xl text-ink">You&apos;re on the list.</p>
+            <p className="font-display text-xl text-ink">You&apos;re all set.</p>
             <p className="mt-2 text-sm text-slate">
-              We&apos;ll reach out on WhatsApp to confirm your parents&apos; details.
+              We&apos;ll reach out on WhatsApp shortly to confirm your plan and
+              get your parents set up.
             </p>
             <button
               onClick={onClose}
@@ -162,7 +163,7 @@ export default function WaitlistModal({
               disabled={state === "submitting"}
               className="w-full rounded-full bg-ink py-3 text-sm font-semibold text-paper hover:opacity-90 disabled:opacity-60"
             >
-              {state === "submitting" ? "Submitting…" : "Join the waitlist"}
+              {state === "submitting" ? "Submitting…" : "Get started"}
             </button>
           </form>
         )}

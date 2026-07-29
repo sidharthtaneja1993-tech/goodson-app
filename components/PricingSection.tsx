@@ -17,8 +17,8 @@ const PLANS = [
   {
     id: "companion",
     name: "Companion",
-    monthly: 50,
-    annual: 500,
+    monthly: 59,
+    annual: 637,
     tagline: "Remote support and peace of mind",
     features: [
       "Weekly wellbeing check-in calls",
@@ -32,8 +32,8 @@ const PLANS = [
   {
     id: "guardian",
     name: "Guardian",
-    monthly: 100,
-    annual: 1000,
+    monthly: 99,
+    annual: 1069,
     tagline: "Hands-on help, on the ground",
     features: [
       "Everything in Companion",
@@ -47,8 +47,8 @@ const PLANS = [
   {
     id: "prestige",
     name: "Prestige",
-    monthly: 200,
-    annual: 2000,
+    monthly: 139,
+    annual: 1501,
     tagline: "A dedicated concierge, always on",
     features: [
       "Everything in Guardian",
@@ -125,7 +125,7 @@ export default function PricingSection({
                     : "text-slate hover:text-ink"
                 }`}
               >
-                {c === "monthly" ? "Monthly" : "Annual · 2 months free"}
+                {c === "monthly" ? "Monthly" : "Annual · save 10%"}
               </button>
             ))}
           </div>
@@ -212,7 +212,7 @@ export default function PricingSection({
                     : "bg-ink text-paper"
                 }`}
               >
-                Join the waitlist
+                Get started
               </button>
             </div>
           ))}
