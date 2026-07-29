@@ -10,6 +10,18 @@ const TESTIMONIALS = [
     name: "Priya",
     detail: "Toronto",
   },
+  {
+    quote:
+      "My parents needed help with everyday chores, and I was worried about them being alone in India. The Goodson team was fast, reliable, and genuinely caring - that anxiety I carried for years has finally eased.",
+    name: "Ragini",
+    detail: "United States",
+  },
+  {
+    quote:
+      "My parents needed help with a hospital visit, which can be so cumbersome to manage from here. Goodson did a wonderful job and stayed constantly in touch with me, supporting us all the way through.",
+    name: "Deepa",
+    detail: "New Zealand",
+  },
 ];
 
 export default function TestimonialsSection() {
@@ -25,7 +37,15 @@ export default function TestimonialsSection() {
           </div>
         </FadeIn>
 
-        <div className="mt-10 grid gap-8 md:grid-cols-3">
+        <div
+          className={`mt-10 grid gap-8 ${
+            TESTIMONIALS.length === 1
+              ? "max-w-xl mx-auto"
+              : TESTIMONIALS.length === 2
+                ? "sm:grid-cols-2 max-w-3xl mx-auto"
+                : "md:grid-cols-3"
+          }`}
+        >
           {TESTIMONIALS.map((t, i) => (
             <FadeIn key={t.name} delay={i * 100}>
               <figure className="flex h-full flex-col rounded-2xl border border-line bg-linen p-8">
