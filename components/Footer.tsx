@@ -14,6 +14,8 @@ export default function Footer() {
             <span className="mt-1 block">© {new Date().getFullYear()} Goodson</span>
           </p>
           <address className="mt-4 text-sm not-italic">
+            Goodson Ventures Pvt Ltd
+            <br />
             Bestech Business Tower, Sohna Road, Sector 48,
             <br />
             Gurugram, HR, 122018
