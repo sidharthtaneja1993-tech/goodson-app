@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import "@fontsource-variable/fraunces/full.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
-import "@fontsource/inter/700.css";
+import "@fontsource/lora/400.css";
+import "@fontsource/lora/500.css";
+import "@fontsource/lora/600.css";
+import "@fontsource/lora/700.css";
+import "@fontsource/nunito-sans/400.css";
+import "@fontsource/nunito-sans/500.css";
+import "@fontsource/nunito-sans/600.css";
+import "@fontsource/nunito-sans/700.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";

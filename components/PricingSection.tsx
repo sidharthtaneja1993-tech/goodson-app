@@ -212,7 +212,7 @@ export default function PricingSection({
                     : "bg-ink text-paper"
                 }`}
               >
-                Get started
+                Join the waitlist
               </button>
             </div>
           ))}

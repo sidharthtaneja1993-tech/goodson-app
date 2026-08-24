@@ -19,7 +19,7 @@ export default function Home() {
     "monthly"
   );
 
-  function openGetStarted(plan: string | null, cycle: "monthly" | "annual" = "monthly") {
+  function openWaitlist(plan: string | null, cycle: "monthly" | "annual" = "monthly") {
     setSelectedPlan(plan);
     setSelectedCycle(cycle);
     setModalOpen(true);
@@ -33,26 +33,27 @@ export default function Home() {
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <FadeIn>
               <div className="mb-6 flex items-center gap-3">
-                <span className="h-px w-8 bg-marigold-deep" />
+                <span className="h-px w-8 bg-marigold" />
                 <span className="font-mono text-xs uppercase tracking-widest text-slate">
-                  For families abroad
+                  Premium concierge care, for families abroad
                 </span>
               </div>
               <h1 className="font-display max-w-xl text-5xl leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-6xl">
-                Someone dependable, on the ground, for your parents in India.
+                A premium concierge for your parents, on the ground in India.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate">
-                Goodson coordinates medical care, home management, and daily
-                errands for elderly parents - so distance stops being the
-                thing you worry about.
+                From household chores and banking errands to medical
+                coordination and emergency response - Goodson handles it all
+                for your elderly parents, so distance stops being the thing
+                you worry about.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <button
-                  onClick={() => openGetStarted(null)}
+                  onClick={() => openWaitlist(null)}
                   className="rounded-full bg-marigold px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-marigold/20"
                 >
-                  Get started
+                  Join the waitlist
                 </button>
                 <a
                   href="#plans"
@@ -80,7 +81,7 @@ export default function Home() {
           </div>
 
           <FadeIn delay={250}>
-            <div className="mt-16 rounded-2xl border border-line bg-ink p-8 text-paper sm:inline-flex">
+            <div className="mt-16 rounded-2xl border border-line-dark bg-ink p-8 text-paper sm:inline-flex">
               <DualClock />
             </div>
           </FadeIn>
@@ -89,7 +90,7 @@ export default function Home() {
 
       <ServicesSection />
       <TestimonialsSection />
-      <PricingSection onSelectPlan={(plan, cycle) => openGetStarted(plan, cycle)} />
+      <PricingSection onSelectPlan={(plan, cycle) => openWaitlist(plan, cycle)} />
       <PinChecker />
 
       <section className="px-6 py-28 sm:px-10">
@@ -99,13 +100,13 @@ export default function Home() {
               Ready when you are
             </h2>
             <p className="mt-4 text-slate">
-              Get started and we&apos;ll reach out on WhatsApp to set things up.
+              Join the waitlist and we&apos;ll reach out on WhatsApp to set things up.
             </p>
             <button
-              onClick={() => openGetStarted(null)}
+              onClick={() => openWaitlist(null)}
               className="mt-8 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink/20"
             >
-              Get started
+              Join the waitlist
             </button>
           </div>
         </FadeIn>

@@ -10,7 +10,7 @@ export default function Footer() {
             Concierge care for parents in India, coordinated for families abroad.
           </p>
           <p className="mt-4 text-sm">
-            <span className="block">WhatsApp: available once you get started</span>
+            <span className="block">WhatsApp: available once you join the waitlist</span>
             <span className="mt-1 block">© {new Date().getFullYear()} Goodson</span>
           </p>
           <address className="mt-4 text-sm not-italic">
