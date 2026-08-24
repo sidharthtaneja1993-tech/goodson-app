@@ -11,6 +11,7 @@ import PricingSection from "@/components/PricingSection";
 import PinChecker from "@/components/PinChecker";
 import WaitlistModal from "@/components/WaitlistModal";
 import FadeIn from "@/components/FadeIn";
+import CounterStat from "@/components/CounterStat";
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,6 +88,11 @@ export default function Home() {
           </FadeIn>
         </div>
       </section>
+
+      <CounterStat
+        value={280}
+        label="Parents currently availing Goodson's care"
+      />
 
       <ServicesSection />
       <TestimonialsSection />
