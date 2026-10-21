@@ -8,7 +8,10 @@ export default function Header() {
           Goodson
         </span>
         <span className="mt-2 block max-w-[15rem] text-xs leading-snug text-slate sm:max-w-none sm:text-sm">
-          Protect your parents at home, for less than a coffee a day.
+          Protect your parents at home,{" "}
+          <span className="whitespace-nowrap rounded-md bg-go-soft px-1.5 py-0.5 font-semibold text-go">
+            for less than a coffee a day.
+          </span>
         </span>
       </Link>
       <nav className="flex items-center gap-6 pt-2 text-sm text-slate">

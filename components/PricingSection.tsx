@@ -50,8 +50,11 @@ export default function PricingSection({
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <p className="rounded-full border border-line bg-paper px-4 py-2 text-sm text-slate">
-            Subscribe for 1, 3, 6 or 12 months · save up to{" "}
-            {Math.round(MAX_DISCOUNT * 100)}% on longer terms
+            Subscribe for 1, 3, 6 or 12 months ·{" "}
+            <span className="font-semibold text-go">
+              save up to {Math.round(MAX_DISCOUNT * 100)}%
+            </span>{" "}
+            on longer terms
           </p>
 
           <label className="ml-auto flex items-center gap-2 text-sm text-slate">
@@ -104,18 +107,23 @@ export default function PricingSection({
               </div>
 
               <ul className="mt-6 flex-1 space-y-3 text-sm">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex gap-2">
-                    <span
-                      className={
-                        plan.featured ? "text-marigold" : "text-marigold-deep"
-                      }
-                    >
-                      ✓
-                    </span>
-                    <span>{f}</span>
-                  </li>
-                ))}
+                {plan.features.map((f) => {
+                  const urgent = f.startsWith("24×7");
+                  return (
+                    <li key={f} className="flex gap-2">
+                      <span
+                        className={
+                          urgent
+                            ? plan.featured ? "text-alert-dark" : "text-alert"
+                            : plan.featured ? "text-go-dark" : "text-go"
+                        }
+                      >
+                        {urgent ? "●" : "✓"}
+                      </span>
+                      <span className={urgent ? "font-semibold" : ""}>{f}</span>
+                    </li>
+                  );
+                })}
               </ul>
 
               <p

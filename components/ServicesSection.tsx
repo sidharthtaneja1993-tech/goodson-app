@@ -18,9 +18,10 @@ function Icon({ children }: { children: ReactNode }) {
   );
 }
 
-const SERVICES: { title: string; detail: string; icon: ReactNode }[] = [
+const SERVICES: { title: string; detail: string; icon: ReactNode; accent?: "alert" | "go" }[] = [
   {
     title: "Medical coordination",
+    accent: "alert",
     detail:
       "Appointment scheduling, hospital escorts, and a summary sent to you after every visit.",
     icon: (
@@ -77,6 +78,7 @@ const SERVICES: { title: string; detail: string; icon: ReactNode }[] = [
   },
   {
     title: "Family updates",
+    accent: "go",
     detail: "Regular updates on WhatsApp, in whatever detail you want.",
     icon: (
       <Icon>
@@ -107,7 +109,13 @@ export default function ServicesSection() {
           {SERVICES.map((s, i) => (
             <FadeIn key={s.title} delay={i * 60}>
               <div className="group border-t border-line-dark py-6 transition-colors duration-300 hover:border-marigold">
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line-dark text-marigold transition-colors duration-300 group-hover:border-marigold">
+                <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors duration-300 ${
+                    s.accent === "alert"
+                      ? "border-alert-dark/60 bg-alert-dark/10 text-alert-dark"
+                      : s.accent === "go"
+                        ? "border-go-dark/60 bg-go-dark/10 text-go-dark"
+                        : "border-line-dark text-marigold group-hover:border-marigold"
+                  }`}>
                   {s.icon}
                 </div>
                 <h3 className="font-display text-xl transition-transform duration-300 group-hover:translate-x-1">
@@ -120,17 +128,17 @@ export default function ServicesSection() {
         </div>
 
         <FadeIn delay={200}>
-          <div className="mt-16 grid gap-8 rounded-2xl border border-line-dark p-8 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="mt-16 grid gap-8 rounded-2xl border border-alert-dark/40 bg-alert-dark/5 p-8 sm:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-marigold/60 text-marigold">
+              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-alert-dark/60 bg-alert-dark/10 text-alert-dark">
                 <Icon>
                   <path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6l7-3z" />
                   <path d="M9 12l2 2 4-4" />
                 </Icon>
               </div>
               <div className="mb-4 flex items-center gap-3">
-                <span className="h-px w-8 bg-marigold" />
-                <span className="font-mono text-xs uppercase tracking-widest text-marigold">
+                <span className="h-px w-8 bg-alert-dark" />
+                <span className="font-mono text-xs uppercase tracking-widest text-alert-dark">
                   For the tricky situations
                 </span>
               </div>

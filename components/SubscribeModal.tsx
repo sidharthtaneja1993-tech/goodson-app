@@ -174,7 +174,7 @@ export default function SubscribeModal({
                         <span className="block text-xs text-slate">
                           {money(Math.round(perMonth))}/mo
                           {t.discount > 0 && (
-                            <span className="ml-2 font-semibold text-marigold-deep">
+                            <span className="ml-2 rounded bg-go-soft px-1.5 py-0.5 font-semibold text-go">
                               Save {Math.round(t.discount * 100)}%
                             </span>
                           )}

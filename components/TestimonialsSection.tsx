@@ -49,10 +49,14 @@ export default function TestimonialsSection() {
           {TESTIMONIALS.map((t, i) => (
             <FadeIn key={t.name} delay={i * 100}>
               <figure className="flex h-full flex-col rounded-2xl border border-line bg-linen p-8">
+                <span aria-hidden="true" className="font-display -mb-2 block text-5xl leading-none text-alert">
+                  &ldquo;
+                </span>
                 <blockquote className="font-display flex-1 text-lg leading-snug text-ink">
                   &ldquo;{t.quote}&rdquo;
                 </blockquote>
                 <figcaption className="mt-6 text-sm">
+                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-go align-middle" />
                   <span className="font-medium text-ink">{t.name}</span>
                   <span className="text-slate"> · {t.detail}</span>
                 </figcaption>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function PinChecker() {
+export default function PinChecker({ compact = false }: { compact?: boolean }) {
   const [pin, setPin] = useState("");
   const [status, setStatus] = useState<
     "idle" | "checking" | "covered" | "not-covered" | "invalid"
@@ -24,18 +24,10 @@ export default function PinChecker() {
     }
   }
 
-  return (
-    <section className="border-y border-line bg-paper px-6 py-16 sm:px-10">
-      <div className="mx-auto max-w-2xl text-center">
-        <span className="font-mono text-xs uppercase tracking-widest text-slate">
-          Coverage check
-        </span>
-        <h3 className="font-display mt-2 text-2xl text-ink sm:text-3xl">
-          See if we&apos;re already in your parents&apos; neighbourhood
-        </h3>
+  const form = (
         <form
           onSubmit={checkPin}
-          className="mx-auto mt-6 flex max-w-sm items-center gap-2"
+          className={`${compact ? "flex w-full max-w-md" : "mx-auto mt-6 flex max-w-sm"} items-center gap-2`}
         >
           <input
             inputMode="numeric"
@@ -55,25 +47,53 @@ export default function PinChecker() {
             Check
           </button>
         </form>
+  );
 
-        <div className="mt-4 h-6 text-sm">
+  const result = (
+        <div className={`${compact ? "mt-2 min-h-5 text-left" : "mt-4 h-6"} text-sm`}>
           {status === "checking" && (
             <span className="text-slate">Checking…</span>
           )}
           {status === "invalid" && (
-            <span className="text-rose-ash">Enter a valid 6-digit PIN code.</span>
+            <span className="font-medium text-alert">Enter a valid 6-digit PIN code.</span>
           )}
           {status === "covered" && (
-            <span className="font-medium text-marigold-deep">
-              Good news - we currently serve this area.
+            <span className="inline-flex items-center gap-2 rounded-full bg-go-soft px-3 py-1 font-semibold text-go">
+              ✓ Good news - we currently serve this area.
             </span>
           )}
           {status === "not-covered" && (
             <span className="text-slate">
-              Not yet in this area - join the waitlist and we&apos;ll notify you as we expand.
+              Not yet in this area - tap Subscribe now and we&apos;ll let you know as soon as we expand.
             </span>
           )}
         </div>
+  );
+
+  if (compact) {
+    return (
+      <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6">
+        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+          <span className="inline-flex h-2 w-2 rounded-full bg-go" />
+          First, check if we serve your parents&apos; area
+        </p>
+        {form}
+        {result}
+      </div>
+    );
+  }
+
+  return (
+    <section className="border-y border-line bg-paper px-6 py-16 sm:px-10">
+      <div className="mx-auto max-w-2xl text-center">
+        <span className="font-mono text-xs uppercase tracking-widest text-slate">
+          Coverage check
+        </span>
+        <h3 className="font-display mt-2 text-2xl text-ink sm:text-3xl">
+          See if we&apos;re already in your parents&apos; neighbourhood
+        </h3>
+        {form}
+        {result}
       </div>
     </section>
   );

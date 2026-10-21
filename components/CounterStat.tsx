@@ -57,7 +57,7 @@ export default function CounterStat({
     >
       <p className="font-display text-6xl tracking-tight text-ink sm:text-7xl">
         {display}
-        {suffix}
+        <span className="text-go">{suffix}</span>
       </p>
       <p className="mt-3 text-sm uppercase tracking-widest text-slate">
         {label}

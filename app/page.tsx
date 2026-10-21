@@ -32,6 +32,10 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <FadeIn>
+              <div className="mb-10">
+                <PinChecker compact />
+              </div>
+
               <div className="mb-6 flex items-center gap-3">
                 <span className="h-px w-8 bg-marigold" />
                 <span className="font-mono text-xs uppercase tracking-widest text-slate">
@@ -48,13 +52,13 @@ export default function Home() {
                 you worry about.
               </p>
 
-              <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-line bg-paper px-4 py-2 text-sm text-ink">
+              <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-alert/30 bg-alert-soft px-4 py-2 text-sm text-ink">
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-alert opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-alert" />
                 </span>
                 <span>
-                  <strong className="font-semibold">24×7 emergency response &amp; hospital coordination</strong>
+                  <strong className="font-semibold text-alert">24×7 emergency response &amp; hospital coordination</strong>
                   <span className="text-slate"> · included in every plan</span>
                 </span>
               </div>
@@ -113,7 +117,6 @@ export default function Home() {
           openSubscribe(plan);
         }}
       />
-      <PinChecker />
 
       <section className="px-6 py-28 sm:px-10">
         <FadeIn>

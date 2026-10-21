@@ -15,6 +15,14 @@
   --line-dark: #5C4A34;  /* hairline borders on dark */
   --charcoal: #2E2418;   /* body text on light */
 
+  /* Punch accents - used sparingly for urgency (red) and reassurance (green) */
+  --alert: #B83227;       /* brick red - emergency, urgency */
+  --alert-soft: #F6DCD6;  /* red tint background */
+  --alert-on-dark: #F07A6E;
+  --go: #2E7D4F;          /* forest green - savings, checks, "yes" */
+  --go-soft: #D7EBD9;     /* green tint background */
+  --go-on-dark: #6FCF97;
+
   --background: var(--paper);
   --foreground: var(--charcoal);
 }
@@ -32,6 +40,12 @@
   --color-line: var(--line);
   --color-line-dark: var(--line-dark);
   --color-charcoal: var(--charcoal);
+  --color-alert: var(--alert);
+  --color-alert-soft: var(--alert-soft);
+  --color-alert-dark: var(--alert-on-dark);
+  --color-go: var(--go);
+  --color-go-soft: var(--go-soft);
+  --color-go-dark: var(--go-on-dark);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-display: "Lora", ui-serif, Georgia, serif;
