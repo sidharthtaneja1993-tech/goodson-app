@@ -35,7 +35,7 @@ export default function Home() {
               <PinChecker compact />
             </div>
           </FadeIn>
-          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             <FadeIn>
               <div className="mb-6 flex items-center gap-3">
                 <span className="h-px w-8 bg-marigold" />
@@ -78,29 +78,26 @@ export default function Home() {
                   See plans
                 </a>
               </div>
+
             </FadeIn>
 
             <FadeIn delay={150}>
-              <div className="relative">
-                <div className="overflow-hidden rounded-2xl border border-line shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
-                  <Image
-                    src="/hero-team.png"
-                    alt="A Goodson caregiver visiting with an elderly couple at home"
-                    width={1200}
-                    height={900}
-                    priority
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+              <div className="overflow-hidden rounded-2xl border border-line shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
+                <Image
+                  src="/hero-team.png"
+                  alt="A Goodson caregiver visiting with an elderly couple at home"
+                  width={1200}
+                  height={900}
+                  priority
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+              <div className="mt-5 flex justify-center rounded-2xl border border-line-dark bg-ink p-6 text-paper">
+                <DualClock />
               </div>
             </FadeIn>
           </div>
-
-          <FadeIn delay={250}>
-            <div className="mt-16 rounded-2xl border border-line-dark bg-ink p-8 text-paper sm:inline-flex">
-              <DualClock />
-            </div>
-          </FadeIn>
         </div>
       </section>
 

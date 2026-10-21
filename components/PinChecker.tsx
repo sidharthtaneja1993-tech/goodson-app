@@ -27,7 +27,7 @@ export default function PinChecker({ compact = false }: { compact?: boolean }) {
   const form = (
         <form
           onSubmit={checkPin}
-          className={`${compact ? "flex w-full max-w-md" : "mx-auto mt-6 flex max-w-sm"} items-center gap-2`}
+          className={`${compact ? "flex w-full" : "mx-auto mt-6 flex max-w-sm"} items-center gap-2`}
         >
           <input
             inputMode="numeric"
@@ -72,13 +72,20 @@ export default function PinChecker({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6">
-        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
-          <span className="inline-flex h-2 w-2 rounded-full bg-go" />
-          First, check if we serve your parents&apos; area
-        </p>
-        {form}
-        {result}
+      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+        <div>
+          <p className="flex items-center gap-2 text-base font-semibold text-ink sm:text-lg">
+            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-go" />
+            First, check if we serve your parents&apos; area
+          </p>
+          <p className="mt-1 text-sm text-slate">
+            Enter their 6-digit PIN code. It takes a second.
+          </p>
+        </div>
+        <div className="w-full lg:max-w-md">
+          {form}
+          {result}
+        </div>
       </div>
     );
   }
