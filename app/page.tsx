@@ -30,12 +30,13 @@ export default function Home() {
       <section className="relative overflow-hidden bg-linen px-6 pb-24 pt-40 text-charcoal sm:px-10 sm:pt-48">
         <Header />
         <div className="mx-auto max-w-6xl">
+          <FadeIn>
+            <div className="mb-12">
+              <PinChecker compact />
+            </div>
+          </FadeIn>
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <FadeIn>
-              <div className="mb-10">
-                <PinChecker compact />
-              </div>
-
               <div className="mb-6 flex items-center gap-3">
                 <span className="h-px w-8 bg-marigold" />
                 <span className="font-mono text-xs uppercase tracking-widest text-slate">
