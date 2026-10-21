@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WHATSAPP_DISPLAY, whatsappLink } from "@/lib/whatsapp";
 
 export default function Footer() {
   return (
@@ -10,7 +11,14 @@ export default function Footer() {
             Concierge care for parents in India, coordinated for families abroad.
           </p>
           <p className="mt-4 text-sm">
-            <span className="block">WhatsApp: available once you join the waitlist</span>
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block hover:text-paper"
+            >
+              WhatsApp: {WHATSAPP_DISPLAY}
+            </a>
             <span className="mt-1 block">© {new Date().getFullYear()} Goodson</span>
           </p>
           <address className="mt-4 text-sm not-italic">

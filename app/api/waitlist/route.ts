@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getResendClient } from "@/lib/email/resend";
 import { confirmationEmail, notificationEmail } from "@/lib/email/templates";
+import { getPlan, getTerm, termLabel, termTotalUSD } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -14,16 +15,37 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Work out the price on the server too, so the stored amount can't be tampered with.
+  const planInfo = getPlan(plan);
+  const termInfo = getTerm(billing_cycle);
+  const amountUsd =
+    planInfo && termInfo ? termTotalUSD(planInfo.monthly, termInfo) : null;
+
   const supabase = await createClient();
-  const { error } = await supabase.from("waitlist").insert({
+  const row = {
     name,
     email,
     phone,
     pincode: pincode || null,
-    plan: plan || null,
-    billing_cycle: billing_cycle || "monthly",
+    plan: planInfo ? planInfo.id : null,
+    billing_cycle: termInfo ? termInfo.id : billing_cycle || "1_month",
     message: message || null,
-  });
+  };
+  let { error } = await supabase.from("waitlist").insert(row);
+
+  // Safety net: if the database hasn't been updated yet to allow the new
+  // 1/3/6/12-month values (supabase/migrations/002_subscription_terms.sql),
+  // save the lead anyway with the term written into the message.
+  if (error?.code === "23514") {
+    console.warn("billing_cycle constraint not migrated yet; saving term in message.");
+    ({ error } = await supabase.from("waitlist").insert({
+      ...row,
+      billing_cycle: termInfo?.months === 12 ? "annual" : "monthly",
+      message: `[Term: ${termLabel(row.billing_cycle)}${
+        amountUsd ? `, $${amountUsd}` : ""
+      }] ${message || ""}`.trim(),
+    }));
+  }
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -44,7 +66,8 @@ export async function POST(req: NextRequest) {
       phone,
       pincode,
       plan,
-      billing_cycle,
+      billing_cycle: row.billing_cycle,
+      amount_usd: amountUsd,
       message,
     };
 

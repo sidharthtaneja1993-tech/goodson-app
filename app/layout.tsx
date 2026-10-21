@@ -11,6 +11,7 @@ import "@fontsource/nunito-sans/700.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Goodson — Premium concierge care for your parents in India",
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         {children}
+        <WhatsAppButton />
         <Analytics />
       </body>
     </html>

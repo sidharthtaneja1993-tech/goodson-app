@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { termLabel } from "@/lib/plans";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -61,7 +62,7 @@ export default async function AdminPage() {
 
         <section className="mt-10">
           <h2 className="font-display text-xl text-ink">
-            Waitlist ({waitlist?.length ?? 0})
+            Subscription requests ({waitlist?.length ?? 0})
           </h2>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-paper">
             <table className="w-full min-w-[720px] text-left text-sm">
@@ -83,7 +84,7 @@ export default async function AdminPage() {
                     <td className="px-4 py-3">{w.phone}</td>
                     <td className="px-4 py-3">{w.pincode || "—"}</td>
                     <td className="px-4 py-3 capitalize">
-                      {w.plan || "—"} {w.billing_cycle ? `(${w.billing_cycle})` : ""}
+                      {w.plan || "—"} {w.billing_cycle ? `(${termLabel(w.billing_cycle)})` : ""}
                     </td>
                     <td className="px-4 py-3 text-slate">
                       {new Date(w.created_at).toLocaleDateString()}

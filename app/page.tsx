@@ -9,20 +9,19 @@ import ServicesSection from "@/components/ServicesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import PricingSection from "@/components/PricingSection";
 import PinChecker from "@/components/PinChecker";
-import WaitlistModal from "@/components/WaitlistModal";
+import SubscribeModal from "@/components/SubscribeModal";
 import FadeIn from "@/components/FadeIn";
 import CounterStat from "@/components/CounterStat";
+import type { CurrencyCode, PlanId } from "@/lib/plans";
 
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [selectedCycle, setSelectedCycle] = useState<"monthly" | "annual">(
-    "monthly"
-  );
+  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
+  const [rate, setRate] = useState<number | null>(1);
 
-  function openWaitlist(plan: string | null, cycle: "monthly" | "annual" = "monthly") {
+  function openSubscribe(plan: PlanId | null) {
     setSelectedPlan(plan);
-    setSelectedCycle(cycle);
     setModalOpen(true);
   }
 
@@ -51,10 +50,10 @@ export default function Home() {
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <button
-                  onClick={() => openWaitlist(null)}
+                  onClick={() => openSubscribe(null)}
                   className="rounded-full bg-marigold px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-marigold/20"
                 >
-                  Join the waitlist
+                  Subscribe now
                 </button>
                 <a
                   href="#plans"
@@ -96,7 +95,13 @@ export default function Home() {
 
       <ServicesSection />
       <TestimonialsSection />
-      <PricingSection onSelectPlan={(plan, cycle) => openWaitlist(plan, cycle)} />
+      <PricingSection
+        onSelectPlan={(plan, cur, r) => {
+          setCurrency(cur);
+          setRate(r);
+          openSubscribe(plan);
+        }}
+      />
       <PinChecker />
 
       <section className="px-6 py-28 sm:px-10">
@@ -106,13 +111,13 @@ export default function Home() {
               Ready when you are
             </h2>
             <p className="mt-4 text-slate">
-              Join the waitlist and we&apos;ll reach out on WhatsApp to set things up.
+              Pick a plan and a subscription length, and we&apos;ll reach out on WhatsApp to set things up.
             </p>
             <button
-              onClick={() => openWaitlist(null)}
+              onClick={() => openSubscribe(null)}
               className="mt-8 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink/20"
             >
-              Join the waitlist
+              Subscribe now
             </button>
           </div>
         </FadeIn>
@@ -120,11 +125,12 @@ export default function Home() {
 
       <Footer />
 
-      <WaitlistModal
+      <SubscribeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        plan={selectedPlan}
-        cycle={selectedCycle}
+        initialPlan={selectedPlan}
+        currency={currency}
+        rate={rate}
       />
     </main>
   );

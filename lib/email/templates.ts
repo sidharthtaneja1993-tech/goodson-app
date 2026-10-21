@@ -1,3 +1,5 @@
+import { termLabel } from "@/lib/plans";
+
 export type WaitlistDetails = {
   name: string;
   email: string;
@@ -5,6 +7,7 @@ export type WaitlistDetails = {
   pincode?: string | null;
   plan?: string | null;
   billing_cycle?: string | null;
+  amount_usd?: number | null;
   message?: string | null;
 };
 
@@ -59,30 +62,30 @@ function wrap(bodyHtml: string) {
 </html>`;
 }
 
-/** Sent to the person who joined the waitlist. */
+/** Sent to the person who submitted the Subscribe form. */
 export function confirmationEmail(d: WaitlistDetails) {
   const planLine = d.plan
     ? `<p style="margin:0 0 16px;">Plan selected: <strong style="text-transform:capitalize;">${escapeHtml(
         d.plan
-      )}</strong> · ${d.billing_cycle === "annual" ? "Annual" : "Monthly"}</p>`
+      )}</strong> · ${escapeHtml(termLabel(d.billing_cycle))}${
+        d.amount_usd ? ` · $${d.amount_usd} total` : ""
+      }</p>`
     : "";
 
   return {
-    subject: "You're on the Goodson waitlist",
+    subject: "Your Goodson subscription request",
     html: wrap(`
-      <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">You're on the list, ${escapeHtml(
-      d.name
-    )}.</h1>
-      <p style="margin:0 0 16px;">Thank you for your interest in Goodson. We've saved your details and will reach out on WhatsApp at <strong>${escapeHtml(
+      <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">Thank you, ${escapeHtml(d.name)}.</h1>
+      <p style="margin:0 0 16px;">We've received your Goodson subscription request. We'll reach out on WhatsApp at <strong>${escapeHtml(
         d.phone
-      )}</strong> to confirm your parents' details and get you set up.</p>
+      )}</strong> to confirm your parents' details and send you a secure payment link.</p>
       ${planLine}
       <p style="margin:0;">If anything changes in the meantime, just reply to this email.</p>
     `),
   };
 }
 
-/** Sent to the Goodson team when someone joins the waitlist. */
+/** Sent to the Goodson team when someone submits the Subscribe form. */
 export function notificationEmail(d: WaitlistDetails) {
   const row = (label: string, value?: string | null) =>
     value
@@ -94,9 +97,9 @@ export function notificationEmail(d: WaitlistDetails) {
       : "";
 
   return {
-    subject: `New waitlist signup: ${d.name}`,
+    subject: `New subscription request: ${d.name}`,
     html: wrap(`
-      <h1 style="margin:0 0 16px;font-size:20px;color:${brand.ink};">New waitlist signup</h1>
+      <h1 style="margin:0 0 16px;font-size:20px;color:${brand.ink};">New subscription request</h1>
       <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;font-family:Arial,sans-serif;">
         ${row("Name", d.name)}
         ${row("Email", d.email)}
@@ -105,7 +108,9 @@ export function notificationEmail(d: WaitlistDetails) {
         ${row(
           "Plan",
           d.plan
-            ? `${d.plan} (${d.billing_cycle === "annual" ? "annual" : "monthly"})`
+            ? `${d.plan} (${termLabel(d.billing_cycle)})${
+                d.amount_usd ? ` · $${d.amount_usd}` : ""
+              }`
             : null
         )}
         ${row("Message", d.message)}

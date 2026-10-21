@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import ParentProfileForm from "@/components/ParentProfileForm";
+import { termLabel } from "@/lib/plans";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export default async function DashboardPage() {
               <span className="capitalize font-medium text-ink">
                 {profile.plan}
               </span>{" "}
-              · billed {profile.billing_cycle}
+              · {termLabel(profile.billing_cycle)}
             </p>
           ) : (
             <p className="mt-2 text-slate">

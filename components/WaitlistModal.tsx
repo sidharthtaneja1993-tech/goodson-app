@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { whatsappLink } from "@/lib/whatsapp";
 
 export default function WaitlistModal({
   open,
@@ -84,13 +85,30 @@ export default function WaitlistModal({
             <p className="font-display text-xl text-ink">You&apos;re on the list.</p>
             <p className="mt-2 text-sm text-slate">
               We&apos;ll reach out on WhatsApp to confirm your parents&apos; details.
+              Want to talk sooner? Message us now.
             </p>
-            <button
-              onClick={onClose}
-              className="mt-6 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper"
-            >
-              Close
-            </button>
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <a
+                href={whatsappLink(
+                  plan
+                    ? `Hi Goodson, I just joined the waitlist for the ${
+                        plan.charAt(0).toUpperCase() + plan.slice(1)
+                      } plan (${cycle}). My name is ${form.name}.`
+                    : `Hi Goodson, I just joined the waitlist. My name is ${form.name}.`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Chat with us on WhatsApp
+              </a>
+              <button
+                onClick={onClose}
+                className="text-sm text-slate hover:text-ink"
+              >
+                Close
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">

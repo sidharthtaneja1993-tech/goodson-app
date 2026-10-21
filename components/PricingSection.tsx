@@ -1,72 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type BillingCycle = "monthly" | "annual";
-type CurrencyCode = "USD" | "GBP" | "CAD" | "AUD" | "NZD";
-
-const CURRENCIES: { code: CurrencyCode; symbol: string }[] = [
-  { code: "USD", symbol: "$" },
-  { code: "GBP", symbol: "£" },
-  { code: "CAD", symbol: "CA$" },
-  { code: "AUD", symbol: "A$" },
-  { code: "NZD", symbol: "NZ$" },
-];
-
-const PLANS = [
-  {
-    id: "companion",
-    name: "Companion",
-    monthly: 59,
-    annual: 637,
-    tagline: "Remote support and peace of mind",
-    features: [
-      "Weekly wellbeing check-in calls",
-      "Family update summaries",
-      "Medication & appointment reminders",
-      "WhatsApp support line",
-    ],
-    note: "Remote / light-touch support - no home visits, escorts, or government paperwork.",
-    featured: false,
-  },
-  {
-    id: "guardian",
-    name: "Guardian",
-    monthly: 99,
-    annual: 1069,
-    tagline: "Hands-on help, on the ground",
-    features: [
-      "Everything in Companion",
-      "In-person visits & escorts",
-      "Home repairs & maintenance coordination",
-      "Banking & government errands",
-    ],
-    note: "Unlocks escorts, home repairs, and banking support.",
-    featured: true,
-  },
-  {
-    id: "prestige",
-    name: "Prestige",
-    monthly: 139,
-    annual: 1501,
-    tagline: "A dedicated concierge, always on",
-    features: [
-      "Everything in Guardian",
-      "Unlimited requests",
-      "Dedicated senior concierge",
-      "Priority medical coordination",
-    ],
-    note: "Unlimited support with one dedicated point of contact.",
-    featured: false,
-  },
-] as const;
+import {
+  CURRENCIES,
+  PLANS,
+  MAX_DISCOUNT,
+  formatMoney,
+  type CurrencyCode,
+  type PlanId,
+} from "@/lib/plans";
 
 export default function PricingSection({
   onSelectPlan,
 }: {
-  onSelectPlan: (plan: string, cycle: BillingCycle) => void;
+  onSelectPlan: (plan: PlanId, currency: CurrencyCode, rate: number | null) => void;
 }) {
-  const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [rates, setRates] = useState<Record<string, number> | null>(null);
 
@@ -85,20 +33,7 @@ export default function PricingSection({
     };
   }, []);
 
-  function convert(usd: number) {
-    if (currency === "USD" || !rates?.[currency]) return usd;
-    return usd * rates[currency];
-  }
-
-  function formatPrice(usd: number) {
-    const converted = convert(usd);
-    const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? "$";
-    const decimals = converted % 1 === 0 ? 0 : 2;
-    return `${symbol}${converted.toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    })}`;
-  }
+  const rate = currency === "USD" ? 1 : rates?.[currency] ?? null;
 
   return (
     <section id="plans" className="bg-linen px-6 py-24 sm:px-10">
@@ -114,21 +49,10 @@ export default function PricingSection({
         </h2>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <div className="inline-flex rounded-full border border-line bg-paper p-1">
-            {(["monthly", "annual"] as BillingCycle[]).map((c) => (
-              <button
-                key={c}
-                onClick={() => setCycle(c)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  cycle === c
-                    ? "bg-ink text-paper"
-                    : "text-slate hover:text-ink"
-                }`}
-              >
-                {c === "monthly" ? "Monthly" : "Annual · save 10%"}
-              </button>
-            ))}
-          </div>
+          <p className="rounded-full border border-line bg-paper px-4 py-2 text-sm text-slate">
+            Subscribe for 1, 3, 6 or 12 months · save up to{" "}
+            {Math.round(MAX_DISCOUNT * 100)}% on longer terms
+          </p>
 
           <label className="ml-auto flex items-center gap-2 text-sm text-slate">
             Show prices in
@@ -172,12 +96,10 @@ export default function PricingSection({
 
               <div className="mt-6 flex items-baseline gap-1">
                 <span className="font-display text-4xl">
-                  {formatPrice(cycle === "monthly" ? plan.monthly : plan.annual)}
+                  {formatMoney(plan.monthly, currency, rate)}
                 </span>
-                <span
-                  className={plan.featured ? "text-slate-dark" : "text-slate"}
-                >
-                  /{cycle === "monthly" ? "mo" : "yr"}
+                <span className={plan.featured ? "text-slate-dark" : "text-slate"}>
+                  /mo
                 </span>
               </div>
 
@@ -205,24 +127,16 @@ export default function PricingSection({
               </p>
 
               <button
-                onClick={() => onSelectPlan(plan.id, cycle)}
+                onClick={() => onSelectPlan(plan.id, currency, rate)}
                 className={`mt-8 rounded-full px-5 py-3 text-sm font-semibold transition-opacity hover:opacity-90 ${
-                  plan.featured
-                    ? "bg-marigold text-ink"
-                    : "bg-ink text-paper"
+                  plan.featured ? "bg-marigold text-ink" : "bg-ink text-paper"
                 }`}
               >
-                Join the waitlist
+                Subscribe now
               </button>
             </div>
           ))}
         </div>
-
-        {!rates && (
-          <p className="mt-4 text-xs text-slate">
-            Prices shown in USD. Live currency conversion loads shortly.
-          </p>
-        )}
       </div>
     </section>
   );
