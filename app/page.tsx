@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <main>
-      <section className="relative overflow-hidden bg-linen px-6 pb-24 pt-32 text-charcoal sm:px-10 sm:pt-40">
+      <section className="relative overflow-hidden bg-linen px-6 pb-24 pt-40 text-charcoal sm:px-10 sm:pt-48">
         <Header />
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -48,7 +48,18 @@ export default function Home() {
                 you worry about.
               </p>
 
-              <div className="mt-10 flex flex-wrap items-center gap-4">
+              <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-line bg-paper px-4 py-2 text-sm text-ink">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
+                </span>
+                <span>
+                  <strong className="font-semibold">24×7 emergency response &amp; hospital coordination</strong>
+                  <span className="text-slate"> · included in every plan</span>
+                </span>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => openSubscribe(null)}
                   className="rounded-full bg-marigold px-6 py-3.5 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-marigold/20"

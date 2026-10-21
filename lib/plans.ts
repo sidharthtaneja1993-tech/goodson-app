@@ -22,6 +22,7 @@ export const PLANS = [
     monthly: 59, // USD per month
     tagline: "Remote support and peace of mind",
     features: [
+      "24×7 emergency response & hospital coordination",
       "Weekly wellbeing check-in calls",
       "Family update summaries",
       "Medication & appointment reminders",
@@ -36,6 +37,7 @@ export const PLANS = [
     monthly: 99,
     tagline: "Hands-on help, on the ground",
     features: [
+      "24×7 emergency response & hospital coordination",
       "Everything in Companion",
       "In-person visits & escorts",
       "Home repairs & maintenance coordination",
@@ -50,6 +52,7 @@ export const PLANS = [
     monthly: 139,
     tagline: "A dedicated concierge, always on",
     features: [
+      "24×7 emergency response & hospital coordination",
       "Everything in Guardian",
       "Unlimited requests",
       "Dedicated senior concierge",
