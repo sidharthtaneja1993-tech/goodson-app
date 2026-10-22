@@ -118,3 +118,43 @@ export function notificationEmail(d: WaitlistDetails) {
     `),
   };
 }
+
+export type PaymentDetails = {
+  name: string;
+  email: string;
+  phone: string;
+  plan: string;
+  term: string;
+  amount: string;
+  paymentId: string;
+};
+
+/** Sent to the customer after a successful Razorpay payment. */
+export function paymentReceivedEmail(d: PaymentDetails) {
+  return {
+    subject: `Payment received – Goodson ${d.plan}`,
+    html: wrap(`
+      <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">Thank you, ${escapeHtml(d.name)}.</h1>
+      <p style="margin:0 0 16px;">We've received your payment of <strong>${escapeHtml(d.amount)}</strong> for the <strong>${escapeHtml(
+        d.plan
+      )}</strong> plan (${escapeHtml(d.term)}).</p>
+      <p style="margin:0 0 16px;">Our team will message you on WhatsApp at <strong>${escapeHtml(
+        d.phone
+      )}</strong> to schedule your onboarding call and first visit.</p>
+      <p style="margin:0;color:${brand.slate};font-size:13px;">Payment reference: ${escapeHtml(d.paymentId)}</p>
+    `),
+  };
+}
+
+/** Sent to the Goodson team after a successful payment. */
+export function paymentNotificationEmail(d: PaymentDetails) {
+  return {
+    subject: `💰 Paid: ${d.name} – ${d.plan} (${d.term}) – ${d.amount}`,
+    html: wrap(`
+      <h1 style="margin:0 0 16px;font-size:20px;color:${brand.ink};">New payment received</h1>
+      <p style="margin:0 0 8px;"><strong>${escapeHtml(d.name)}</strong> · ${escapeHtml(d.email)} · ${escapeHtml(d.phone)}</p>
+      <p style="margin:0 0 8px;">${escapeHtml(d.plan)} · ${escapeHtml(d.term)} · <strong>${escapeHtml(d.amount)}</strong></p>
+      <p style="margin:0;color:${brand.slate};font-size:13px;">Razorpay payment: ${escapeHtml(d.paymentId)}</p>
+    `),
+  };
+}

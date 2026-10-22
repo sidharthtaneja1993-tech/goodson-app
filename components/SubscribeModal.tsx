@@ -14,7 +14,30 @@ import {
   type TermId,
 } from "@/lib/plans";
 
-type Step = "plan" | "term" | "details" | "done";
+type Step = "plan" | "term" | "details" | "done" | "paid";
+
+type RazorpayResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
 
 export default function SubscribeModal({
   open,
@@ -39,7 +62,9 @@ export default function SubscribeModal({
     pincode: "",
     message: "",
   });
-  const [state, setState] = useState<"idle" | "submitting" | "error">("idle");
+  const [state, setState] = useState<"idle" | "submitting" | "paying" | "error">("idle");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [paidDisplay, setPaidDisplay] = useState<string>("");
 
   useEffect(() => {
     // Reset the flow each time the popup opens. If a plan card was clicked,
@@ -50,6 +75,7 @@ export default function SubscribeModal({
       setTermId("1_month");
       setStep(initialPlan ? "term" : "plan");
       setState("idle");
+      setNotice(null);
     }
   }, [open, initialPlan]);
 
@@ -63,8 +89,10 @@ export default function SubscribeModal({
     e.preventDefault();
     if (!plan) return;
     setState("submitting");
+    setNotice(null);
     try {
-      const res = await fetch("/api/waitlist", {
+      // 1. Save the request (so we have their details even if they don't pay).
+      const lead = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -74,11 +102,74 @@ export default function SubscribeModal({
           amount_usd: termTotalUSD(plan.monthly, term),
         }),
       });
-      if (!res.ok) throw new Error("failed");
-      setStep("done");
-      setState("idle");
+      if (!lead.ok) throw new Error("failed");
+
+      // 2. Create a Razorpay order on the server (price is worked out there).
+      const orderRes = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: plan.id,
+          term: term.id,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          pincode: form.pincode,
+        }),
+      });
+      if (orderRes.status === 503) {
+        // Payments not switched on yet: fall back to "we'll send you a link".
+        setStep("done");
+        setState("idle");
+        return;
+      }
+      const order = await orderRes.json();
+      if (!orderRes.ok) throw new Error(order?.error || "order failed");
+
+      // 3. Open Razorpay Checkout.
+      const ok = await loadRazorpay();
+      if (!ok || !window.Razorpay) throw new Error("checkout failed to load");
+
+      setState("paying");
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        order_id: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Goodson",
+        description: `${plan.name} · ${term.label}`,
+        prefill: { name: form.name, email: form.email, contact: form.phone },
+        notes: order.notes,
+        theme: { color: "#3A2E22" },
+        handler: async (resp: RazorpayResponse) => {
+          setState("submitting");
+          const v = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(resp),
+          });
+          if (v.ok) {
+            setPaidDisplay(order.display);
+            setStep("paid");
+            setState("idle");
+          } else {
+            setState("error");
+            setNotice(
+              "We couldn't confirm your payment automatically. If money was deducted, don't worry - message us on WhatsApp and we'll sort it out right away."
+            );
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setState("idle");
+            setNotice("Payment wasn't completed. You can try again, or message us on WhatsApp for help.");
+          },
+        },
+      });
+      rzp.open();
     } catch {
       setState("error");
+      setNotice("Something went wrong - please try again, or message us on WhatsApp.");
     }
   }
 
@@ -104,6 +195,7 @@ export default function SubscribeModal({
               {step === "term" && "How long would you like to subscribe?"}
               {step === "details" && "Your details"}
               {step === "done" && "Thank you"}
+              {step === "paid" && "Welcome to Goodson"}
             </h3>
             {plan && step !== "plan" && (
               <p className="mt-1 text-sm text-slate">
@@ -257,8 +349,10 @@ export default function SubscribeModal({
               />
             </div>
 
-            {state === "error" && (
-              <p className="text-sm text-rose-ash">Something went wrong - please try again.</p>
+            {notice && (
+              <p className={`rounded-lg px-3 py-2 text-sm ${state === "error" ? "bg-alert-soft text-alert" : "bg-linen text-ink"}`}>
+                {notice}
+              </p>
             )}
 
             <div className="flex items-center justify-between gap-4 pt-2">
@@ -271,22 +365,54 @@ export default function SubscribeModal({
               </button>
               <button
                 type="submit"
-                disabled={state === "submitting"}
+                disabled={state === "submitting" || state === "paying"}
                 className="flex-1 rounded-full bg-ink py-3 text-sm font-semibold text-paper hover:opacity-90 disabled:opacity-60"
               >
                 {state === "submitting"
-                  ? "Submitting…"
-                  : `Subscribe · ${money(termTotalUSD(plan.monthly, term))}`}
+                  ? "Please wait…"
+                  : state === "paying"
+                    ? "Complete payment in the Razorpay window…"
+                    : `Pay securely · ${money(termTotalUSD(plan.monthly, term))}`}
               </button>
             </div>
             <p className="text-center text-xs text-slate">
-              No payment taken now. We&apos;ll confirm your parents&apos; details and send a
-              secure payment link on WhatsApp.
+              Secure payment by Razorpay. One-time payment for {term.label}.{" "}
+              <strong className="text-go">No auto-renewal</strong> - we&apos;ll remind you on WhatsApp
+              before your plan ends.
             </p>
           </form>
         )}
 
-        {/* Step 4: confirmation */}
+        {/* Paid */}
+        {step === "paid" && plan && (
+          <div className="py-4 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-go-soft text-2xl text-go">
+              ✓
+            </div>
+            <p className="font-display text-xl text-ink">Payment received - thank you, {form.name}.</p>
+            <p className="mt-2 text-sm text-slate">
+              {plan.name} · {term.label} · {paidDisplay}. A receipt is on its way to {form.email}.
+              We&apos;ll WhatsApp you shortly to book your onboarding call and first visit.
+            </p>
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <a
+                href={whatsappLink(
+                  `Hi Goodson, I just paid for the ${plan.name} plan (${term.label}). My name is ${form.name}.`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+              >
+                Message us on WhatsApp
+              </a>
+              <button onClick={onClose} className="text-sm text-slate hover:text-ink">
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: confirmation (only when payments aren't switched on) */}
         {step === "done" && plan && (
           <div className="py-4 text-center">
             <p className="font-display text-xl text-ink">

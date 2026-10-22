@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { termLabel } from "@/lib/plans";
+import { formatAmount } from "@/lib/payments";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -20,6 +21,12 @@ export default async function AdminPage() {
   if (!profile?.is_admin) {
     redirect("/dashboard");
   }
+
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("id, status, plan, term, amount, currency, name, email, phone, razorpay_payment_id, paid_at, created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   const { data: waitlist } = await supabase
     .from("waitlist")
@@ -61,6 +68,66 @@ export default async function AdminPage() {
         </h1>
 
         <section className="mt-10">
+          <h2 className="font-display text-xl text-ink">
+            Payments ({payments?.filter((p) => p.status === "paid").length ?? 0} paid)
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-paper">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-line text-xs uppercase tracking-wide text-slate">
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Phone</th>
+                  <th className="px-4 py-3">Plan</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Razorpay ID</th>
+                  <th className="px-4 py-3">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments?.map((p) => (
+                  <tr key={p.id} className="border-b border-line last:border-0">
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          p.status === "paid"
+                            ? "bg-go-soft text-go"
+                            : p.status === "failed"
+                              ? "bg-alert-soft text-alert"
+                              : "bg-linen text-slate"
+                        }`}
+                      >
+                        {p.status === "created" ? "not completed" : p.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {p.name}
+                      <span className="block text-xs text-slate">{p.email}</span>
+                    </td>
+                    <td className="px-4 py-3">{p.phone}</td>
+                    <td className="px-4 py-3 capitalize">
+                      {p.plan} ({termLabel(p.term)})
+                    </td>
+                    <td className="px-4 py-3">{formatAmount(p.amount, p.currency)}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{p.razorpay_payment_id || "—"}</td>
+                    <td className="px-4 py-3 text-slate">
+                      {new Date(p.paid_at || p.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+                {!payments?.length && (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-slate">
+                      No payments yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="mt-12">
           <h2 className="font-display text-xl text-ink">
             Subscription requests ({waitlist?.length ?? 0})
           </h2>
