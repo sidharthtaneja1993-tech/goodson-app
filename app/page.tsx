@@ -13,6 +13,7 @@ import PinChecker from "@/components/PinChecker";
 import SubscribeModal from "@/components/SubscribeModal";
 import FadeIn from "@/components/FadeIn";
 import CounterStat from "@/components/CounterStat";
+import UpdatesHook from "@/components/UpdatesHook";
 import type { CurrencyCode, PlanId } from "@/lib/plans";
 
 export default function Home() {
@@ -118,6 +119,7 @@ export default function Home() {
       />
 
       <ServicesSection />
+      <UpdatesHook />
       <TestimonialsSection />
       <PricingSection
         onSelectPlan={(plan, cur, r) => {
