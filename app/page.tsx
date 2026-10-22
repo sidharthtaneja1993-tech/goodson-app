@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DualClock from "@/components/DualClock";
@@ -12,7 +13,6 @@ import PinChecker from "@/components/PinChecker";
 import SubscribeModal from "@/components/SubscribeModal";
 import FadeIn from "@/components/FadeIn";
 import CounterStat from "@/components/CounterStat";
-import UpdatesHook from "@/components/UpdatesHook";
 import type { CurrencyCode, PlanId } from "@/lib/plans";
 
 export default function Home() {
@@ -78,6 +78,16 @@ export default function Home() {
                 >
                   See plans
                 </a>
+                <Link
+                  href="/updates"
+                  className="inline-flex items-center gap-2 rounded-full border border-go/30 bg-go-soft px-6 py-3.5 text-sm font-semibold text-go transition-colors duration-200 hover:border-go"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+                    <path d="M4 5h16v11H9l-4 4v-4H4z" />
+                    <path d="M8 9h8M8 12h5" />
+                  </svg>
+                  See a sample update
+                </Link>
               </div>
 
             </FadeIn>
@@ -108,7 +118,6 @@ export default function Home() {
       />
 
       <ServicesSection />
-      <UpdatesHook />
       <TestimonialsSection />
       <PricingSection
         onSelectPlan={(plan, cur, r) => {
