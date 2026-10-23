@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rzp, verifySubscriptionSignature } from "@/lib/razorpay";
 import { recordCharge, type RzpPayment, type RzpSubscription } from "@/lib/subscriptions";
+import { ensureIntake } from "@/lib/onboarding";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: NextRequest) {
   const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } = await req.json();
@@ -25,5 +27,17 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Could not record subscription charge (webhook will retry):", e);
   }
-  return NextResponse.json({ ok: true });
+
+  // Private link for the parents' details form, shown on the success screen.
+  let onboardingToken: string | null = null;
+  const db = createAdminClient();
+  if (db) {
+    const { data: row } = await db
+      .from("subscriptions")
+      .select("name, email, phone, plan, term")
+      .eq("razorpay_subscription_id", razorpay_subscription_id)
+      .maybeSingle();
+    if (row) onboardingToken = await ensureIntake({ ref: razorpay_subscription_id, ...row });
+  }
+  return NextResponse.json({ ok: true, onboardingToken });
 }

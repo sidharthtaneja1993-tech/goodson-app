@@ -24,6 +24,7 @@ export default function TermsPage() {
         check-ins, family updates, appointment coordination, home visits,
         escorts, home repair coordination, banking and government errand
         support, and emergency coordination, as described on our pricing page.
+        Each plan covers up to two parents living together at the same address.
       </p>
 
       <h2>Where we operate</h2>

@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getResendClient } from "@/lib/email/resend";
 import { paymentReceivedEmail, paymentNotificationEmail } from "@/lib/email/templates";
 import { getPlan, termLabel } from "@/lib/plans";
+import { ensureIntake, onboardingUrl } from "@/lib/onboarding";
 
 /**
  * Marks an order as paid. Safe to call twice (from the checkout callback and
@@ -28,10 +29,20 @@ export async function markPaid(orderId: string, paymentId: string) {
   const row = updated?.[0];
   if (!row) return; // already marked paid earlier
 
+  const token = await ensureIntake({
+    ref: orderId,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    plan: row.plan,
+    term: row.term,
+  });
+
   const resend = getResendClient();
   if (!resend) return;
   const from = process.env.RESEND_FROM_EMAIL || "Goodson <onboarding@resend.dev>";
   const details = {
+    onboardingUrl: token ? onboardingUrl(token) : null,
     name: row.name,
     email: row.email,
     phone: row.phone,

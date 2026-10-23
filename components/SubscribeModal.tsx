@@ -71,6 +71,7 @@ export default function SubscribeModal({
   const [paidDisplay, setPaidDisplay] = useState<string>("");
   const [billing, setBilling] = useState<Billing>("auto");
   const [paidAuto, setPaidAuto] = useState(false);
+  const [onboardingToken, setOnboardingToken] = useState<string | null>(null);
 
   useEffect(() => {
     // Reset the flow each time the popup opens. If a plan card was clicked,
@@ -189,6 +190,8 @@ export default function SubscribeModal({
             resp
           );
           if (v.ok) {
+            const vd = await v.json().catch(() => ({}));
+            setOnboardingToken(vd?.onboardingToken ?? null);
             setPaidDisplay(display);
             setPaidAuto(mode === "auto");
             setStep("paid");
@@ -495,8 +498,26 @@ export default function SubscribeModal({
             <p className="mt-2 text-sm text-slate">
               {plan.name} · {term.label} · {paidDisplay}
               {paidAuto ? ", renews automatically" : ""}. A receipt is on its way to {form.email}.
-              We&apos;ll WhatsApp you shortly to book your onboarding call and first visit.
             </p>
+            {onboardingToken ? (
+              <div className="mt-6 rounded-xl bg-linen p-4 text-left">
+                <p className="text-sm font-semibold text-ink">Next step: tell us about your parents</p>
+                <p className="mt-1 text-xs text-slate">
+                  About 5 minutes. Your concierge will then WhatsApp you within 3 days to schedule the first visit.
+                </p>
+                <a
+                  href={`/onboarding/${onboardingToken}`}
+                  className="mt-3 block rounded-full bg-ink py-3 text-center text-sm font-semibold text-paper hover:opacity-90"
+                >
+                  Add your parents&apos; details →
+                </a>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-slate">
+                We&apos;ll WhatsApp you <strong className="text-ink">within 3 days</strong> to complete your onboarding
+                and schedule the first visit.
+              </p>
+            )}
             <div className="mt-6 flex flex-col items-center gap-3">
               <a
                 href={whatsappLink(
@@ -522,7 +543,7 @@ export default function SubscribeModal({
               Your {plan.name} subscription request is in.
             </p>
             <p className="mt-2 text-sm text-slate">
-              We&apos;ll reach out on WhatsApp shortly to confirm your parents&apos; details and
+              We&apos;ll reach out on WhatsApp within 3 days to confirm your parents&apos; details and
               send your secure payment link for {term.label} (
               {money(termTotalUSD(plan.monthly, term))}).
             </p>

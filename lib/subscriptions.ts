@@ -8,6 +8,7 @@ import {
 } from "@/lib/email/templates";
 import { planName, renewEvery, termLabel } from "@/lib/plans";
 import { formatAmount } from "@/lib/payments";
+import { ensureIntake, onboardingUrl } from "@/lib/onboarding";
 
 // Shapes of the parts of Razorpay's subscription / payment objects we use.
 export type RzpSubscription = {
@@ -103,6 +104,16 @@ export async function recordCharge(sub: RzpSubscription, payment: RzpPayment) {
     ? new Date(row.current_end).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
     : null;
   const isFirst = (sub.paid_count ?? 1) <= 1;
+  const token = isFirst
+    ? await ensureIntake({
+        ref: sub.id,
+        name: row.name,
+        email: row.email,
+        phone: row.phone,
+        plan: row.plan,
+        term: row.term,
+      })
+    : null;
 
   const jobs = [
     {
@@ -110,6 +121,7 @@ export async function recordCharge(sub: RzpSubscription, payment: RzpPayment) {
       ...(isFirst
         ? paymentReceivedEmail({
             ...details,
+            onboardingUrl: token ? onboardingUrl(token) : null,
             note: `Your plan renews automatically every ${renewEvery(row.term)}${
               nextDate ? ` (next on ${nextDate})` : ""
             }. You can cancel anytime by messaging us on WhatsApp.`,

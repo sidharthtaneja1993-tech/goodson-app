@@ -88,6 +88,12 @@ export default function PricingSection({
             </span>{" "}
             on longer terms
           </p>
+          <p className="rounded-full border border-line bg-paper px-4 py-2 text-sm text-slate">
+            <span className="font-semibold text-go">Onboarding within 3 days</span> of subscribing
+          </p>
+          <p className="rounded-full border border-line bg-paper px-4 py-2 text-sm text-slate">
+            <span className="font-semibold text-go">Covers both parents</span> at the same address
+          </p>
 
           <label className="ml-auto flex items-center gap-2 text-sm text-slate">
             Show prices in

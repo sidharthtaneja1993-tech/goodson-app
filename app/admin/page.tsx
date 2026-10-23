@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { planName, termLabel } from "@/lib/plans";
 import { formatAmount } from "@/lib/payments";
+import type { IntakeData } from "@/lib/onboarding";
 
 export default async function AdminPage({
   searchParams,
@@ -26,6 +27,12 @@ export default async function AdminPage({
   if (!profile?.is_admin) {
     redirect("/dashboard");
   }
+
+  const { data: intakes } = await supabase
+    .from("parent_intakes")
+    .select("id, status, name, email, phone, plan, term, data, submitted_at, created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   const { data: subscriptions } = await supabase
     .from("subscriptions")
@@ -92,6 +99,106 @@ export default async function AdminPage({
         )}
 
         <section className="mt-10">
+          <h2 className="font-display text-xl text-ink">
+            Parents&apos; details ({intakes?.filter((x) => x.status === "submitted").length ?? 0} received,{" "}
+            {intakes?.filter((x) => x.status !== "submitted").length ?? 0} waiting)
+          </h2>
+          <div className="mt-4 space-y-3">
+            {intakes?.map((x) => {
+              const d = x.data as IntakeData | null;
+              return (
+                <details key={x.id} className="rounded-2xl border border-line bg-paper px-5 py-4">
+                  <summary className="flex cursor-pointer flex-wrap items-center gap-3 text-sm">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        x.status === "submitted" ? "bg-go-soft text-go" : "bg-alert-soft text-alert"
+                      }`}
+                    >
+                      {x.status === "submitted" ? "received" : "waiting for family"}
+                    </span>
+                    <span className="font-semibold text-ink">{x.name}</span>
+                    <span className="text-slate">
+                      {planName(x.plan)} ({termLabel(x.term)}) · {x.phone}
+                    </span>
+                    {d?.parents?.length ? (
+                      <span className="text-slate">· Parents: {d.parents.map((p) => p.name).join(" & ")}</span>
+                    ) : null}
+                  </summary>
+                  {d ? (
+                    <div className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+                      {d.parents.map((p, i) => (
+                        <div key={i} className="sm:col-span-2">
+                          <p>
+                            <span className="text-slate">Parent {i + 1}: </span>
+                            <strong>
+                              {[p.name, p.age && `${p.age} yrs`, p.gender, p.phone, p.languages]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </strong>
+                          </p>
+                          {(
+                            [
+                              ["Conditions", p.conditions],
+                              ["Medicines", p.medicines],
+                              ["Doctor", p.doctor],
+                              ["Mobility / allergies", p.mobility],
+                            ] as [string, string][]
+                          )
+                            .filter(([, v]) => v)
+                            .map(([k, v]) => (
+                              <p key={k} className="pl-4">
+                                <span className="text-slate">{k}: </span>
+                                {v}
+                              </p>
+                            ))}
+                        </div>
+                      ))}
+                      <p>
+                        <span className="text-slate">Address: </span>
+                        {d.address}, {d.city} {d.pincode}
+                      </p>
+                      {(
+                        [
+                          ["Lives with / help", d.livesWith],
+                          ["Spare key", d.keys],
+                          ["Preferred hospital", d.hospital],
+                          ["Best time to call", d.callTime],
+                          ["Updates", d.updates],
+                          ["Never without asking", d.neverWithout],
+                          ["Notes", d.notes],
+                        ] as [string, string][]
+                      )
+                        .filter(([, v]) => v)
+                        .map(([k, v]) => (
+                          <p key={k}>
+                            <span className="text-slate">{k}: </span>
+                            {v}
+                          </p>
+                        ))}
+                      {d.contacts.map((c, i) => (
+                        <p key={`c${i}`}>
+                          <span className="text-slate">Emergency contact {i + 1}: </span>
+                          {[c.name, c.relation, c.phone].filter(Boolean).join(" · ")}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-slate">
+                      Not filled in yet. The link was emailed to {x.email}. A gentle WhatsApp reminder helps.
+                    </p>
+                  )}
+                </details>
+              );
+            })}
+            {!intakes?.length && (
+              <p className="rounded-2xl border border-line bg-paper px-5 py-6 text-center text-sm text-slate">
+                No parents&apos; details yet.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-12">
           <h2 className="font-display text-xl text-ink">
             Auto-renew subscriptions (
             {subscriptions?.filter((x) => x.status === "active" && !x.cancel_requested).length ?? 0} active)

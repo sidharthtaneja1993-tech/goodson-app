@@ -78,7 +78,7 @@ export function confirmationEmail(d: WaitlistDetails) {
       <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">Thank you, ${escapeHtml(d.name)}.</h1>
       <p style="margin:0 0 16px;">We've received your Goodson subscription request. Our team will contact you on WhatsApp at <strong>${escapeHtml(
         d.phone
-      )}</strong> or by email to collect your parents' details and get their care set up.</p>
+      )}</strong> or by email <strong>within 3 days</strong> to collect your parents' details and get their care set up.</p>
       ${planLine}
       <p style="margin:0;">If anything changes in the meantime, just reply to this email.</p>
     `),
@@ -128,7 +128,12 @@ export type PaymentDetails = {
   amount: string;
   paymentId: string;
   note?: string;
+  onboardingUrl?: string | null;
 };
+
+function button(href: string, label: string) {
+  return `<p style="margin:24px 0;"><a href="${escapeHtml(href)}" style="display:inline-block;background:${brand.ink};color:${brand.paper};text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;font-size:15px;padding:14px 24px;border-radius:999px;">${escapeHtml(label)}</a></p>`;
+}
 
 /** Sent to the customer after a successful Razorpay payment. */
 export function paymentReceivedEmail(d: PaymentDetails) {
@@ -139,9 +144,17 @@ export function paymentReceivedEmail(d: PaymentDetails) {
       <p style="margin:0 0 16px;">We've received your payment of <strong>${escapeHtml(d.amount)}</strong> for the <strong>${escapeHtml(
         d.plan
       )}</strong> plan (${escapeHtml(d.term)}).</p>
+      ${
+        d.onboardingUrl
+          ? `<p style="margin:0 0 4px;"><strong>Next step:</strong> tell us about your parents. It takes about 5 minutes and helps us prepare for the first visit.</p>${button(
+              d.onboardingUrl,
+              "Add your parents' details"
+            )}`
+          : ""
+      }
       <p style="margin:0 0 16px;">Our team will message you on WhatsApp at <strong>${escapeHtml(
         d.phone
-      )}</strong> to schedule your onboarding call and first visit.</p>
+      )}</strong> <strong>within 3 days</strong> to complete your onboarding and schedule the first visit.</p>
       ${d.note ? `<p style="margin:0 0 16px;">${escapeHtml(d.note)}</p>` : ""}
       <p style="margin:0;color:${brand.slate};font-size:13px;">Payment reference: ${escapeHtml(d.paymentId)}</p>
     `),
@@ -223,6 +236,68 @@ export function paymentNotificationEmail(d: PaymentDetails) {
       <p style="margin:0 0 8px;"><strong>${escapeHtml(d.name)}</strong> · ${escapeHtml(d.email)} · ${escapeHtml(d.phone)}</p>
       <p style="margin:0 0 8px;">${escapeHtml(d.plan)} · ${escapeHtml(d.term)} · <strong>${escapeHtml(d.amount)}</strong></p>
       <p style="margin:0;color:${brand.slate};font-size:13px;">Razorpay payment: ${escapeHtml(d.paymentId)}</p>
+    `),
+  };
+}
+
+/** Sent to the Goodson team when a family submits (or updates) their parents' details. */
+export function intakeNotificationEmail(d: {
+  updated: boolean;
+  customer: string;
+  email: string;
+  phone: string;
+  plan: string;
+  data: import("@/lib/onboarding").IntakeData;
+}) {
+  const row = (label: string, value?: string | null) =>
+    value
+      ? `<tr><td style="padding:4px 12px 4px 0;color:${brand.slate};width:150px;vertical-align:top;">${escapeHtml(
+          label
+        )}</td><td style="padding:4px 0;color:${brand.charcoal};">${escapeHtml(value)}</td></tr>`
+      : "";
+  const parents = d.data.parents
+    .map((p) => {
+      const head = escapeHtml([p.name, p.age && `${p.age} yrs`, p.gender, p.phone, p.languages].filter(Boolean).join(" · "));
+      const health = (
+        [
+          ["Conditions", p.conditions],
+          ["Medicines", p.medicines],
+          ["Doctor", p.doctor],
+          ["Mobility / allergies", p.mobility],
+        ] as [string, string][]
+      )
+        .filter(([, v]) => v)
+        .map(([k, v]) => `<br><span style="color:${brand.slate};">${k}:</span> ${escapeHtml(v)}`)
+        .join("");
+      return `<strong>${head}</strong>${health}`;
+    })
+    .join("<br><br>");
+  const contacts = d.data.contacts
+    .map((c) => [c.name, c.relation, c.phone].filter(Boolean).join(" · "))
+    .join("\n");
+  return {
+    subject: `${d.updated ? "✏️ Parents' details updated" : "📋 Parents' details received"}: ${d.customer}`,
+    html: wrap(`
+      <h1 style="margin:0 0 8px;font-size:20px;color:${brand.ink};">${
+        d.updated ? "Parents' details updated" : "New parents' details"
+      }</h1>
+      <p style="margin:0 0 16px;">${escapeHtml(d.customer)} · ${escapeHtml(d.email)} · ${escapeHtml(d.phone)}<br>${escapeHtml(
+        d.plan
+      )}</p>
+      <p style="margin:0 0 4px;font-weight:bold;">Parents</p>
+      <p style="margin:0 0 16px;">${parents}</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;font-family:Arial,sans-serif;">
+        ${row("Address", `${d.data.address}, ${d.data.city} ${d.data.pincode}`)}
+        ${row("Lives with / help", d.data.livesWith)}
+        ${row("Spare key", d.data.keys)}
+        ${row("Preferred hospital", d.data.hospital)}
+        ${row("Emergency contacts", contacts)}
+        ${row("Best time to call", d.data.callTime)}
+        ${row("Updates", d.data.updates)}
+        ${row("Never without asking", d.data.neverWithout)}
+        ${row("Notes", d.data.notes)}
+      </table>
+      <p style="margin:16px 0 0;color:${brand.slate};font-size:13px;">Everything is also in the admin page.</p>
     `),
   };
 }
