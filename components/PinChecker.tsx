@@ -59,12 +59,26 @@ export default function PinChecker({ compact = false }: { compact?: boolean }) {
           )}
           {status === "covered" && (
             <span className="inline-flex items-center gap-2 rounded-full bg-go-soft px-3 py-1 font-semibold text-go">
-              ✓ Good news - we currently serve this area.
+              ✓ Good news - our on-ground team covers this area. All plans available.
             </span>
           )}
           {status === "not-covered" && (
-            <span className="text-slate">
-              Not yet in this area - tap Subscribe now and we&apos;ll let you know as soon as we expand.
+            <span className="inline-flex flex-wrap items-center gap-2 text-slate">
+              No on-ground team here yet - but{" "}
+              <strong className="text-ink">Companion Remote</strong> may be available here*.
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("goodson:region", { detail: "remote" }));
+                  document.getElementById("plans")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="rounded-full bg-go-soft px-3 py-1 text-xs font-semibold text-go hover:underline"
+              >
+                See Companion Remote →
+              </button>
+              <span className="block w-full text-[11px] text-slate">
+                *Some services may be limited in remote and rural areas.
+              </span>
             </span>
           )}
         </div>
@@ -79,7 +93,8 @@ export default function PinChecker({ compact = false }: { compact?: boolean }) {
             First, check if we serve your parents&apos; area
           </p>
           <p className="mt-1 text-sm text-slate">
-            Enter their 6-digit PIN code. It takes a second.
+            <span className="font-semibold text-ink">On-ground team in Delhi NCR</span> (Delhi,
+            Gurugram, Noida, Ghaziabad, Faridabad). Companion Remote is available in most cities across India.
           </p>
         </div>
         <div className="w-full lg:max-w-md">
@@ -97,7 +112,7 @@ export default function PinChecker({ compact = false }: { compact?: boolean }) {
           Coverage check
         </span>
         <h3 className="font-display mt-2 text-2xl text-ink sm:text-3xl">
-          See if we&apos;re already in your parents&apos; neighbourhood
+          See if we&apos;re already in your parents&apos; neighbourhood (Delhi NCR)
         </h3>
         {form}
         {result}

@@ -1,10 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { termLabel } from "@/lib/plans";
+import { planName, termLabel } from "@/lib/plans";
 import { formatAmount } from "@/lib/payments";
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cancel?: string }>;
+}) {
+  const { cancel } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,6 +26,14 @@ export default async function AdminPage() {
   if (!profile?.is_admin) {
     redirect("/dashboard");
   }
+
+  const { data: subscriptions } = await supabase
+    .from("subscriptions")
+    .select(
+      "id, razorpay_subscription_id, status, cancel_requested, plan, term, amount, currency, name, email, phone, paid_count, current_end, created_at"
+    )
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   const { data: payments } = await supabase
     .from("payments")
@@ -67,7 +80,97 @@ export default async function AdminPage() {
           Admin
         </h1>
 
+        {cancel === "ok" && (
+          <p className="mt-6 rounded-lg bg-go-soft px-4 py-3 text-sm text-go">
+            Done - that subscription won&apos;t renew again. Service continues until the end of the paid period.
+          </p>
+        )}
+        {cancel === "error" && (
+          <p className="mt-6 rounded-lg bg-alert-soft px-4 py-3 text-sm text-alert">
+            Couldn&apos;t cancel that subscription. Try again, or cancel it in the Razorpay dashboard.
+          </p>
+        )}
+
         <section className="mt-10">
+          <h2 className="font-display text-xl text-ink">
+            Auto-renew subscriptions (
+            {subscriptions?.filter((x) => x.status === "active" && !x.cancel_requested).length ?? 0} active)
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-paper">
+            <table className="w-full min-w-[900px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-line text-xs uppercase tracking-wide text-slate">
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Plan</th>
+                  <th className="px-4 py-3">Each renewal</th>
+                  <th className="px-4 py-3">Payments</th>
+                  <th className="px-4 py-3">Next renewal</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {subscriptions?.map((x) => {
+                  const label = x.cancel_requested && x.status === "active" ? "ends at period end" : x.status;
+                  const tone =
+                    x.status === "active" && !x.cancel_requested
+                      ? "bg-go-soft text-go"
+                      : x.status === "halted" || x.status === "pending"
+                        ? "bg-alert-soft text-alert"
+                        : "bg-linen text-slate";
+                  return (
+                    <tr key={x.id} className="border-b border-line last:border-0">
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>{label}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {x.name}
+                        <span className="block text-xs text-slate">
+                          {x.email} · {x.phone}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {planName(x.plan)} ({termLabel(x.term)})
+                      </td>
+                      <td className="px-4 py-3">{formatAmount(x.amount, x.currency)}</td>
+                      <td className="px-4 py-3">{x.paid_count}</td>
+                      <td className="px-4 py-3 text-slate">
+                        {x.current_end && !x.cancel_requested && x.status === "active"
+                          ? new Date(x.current_end).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {x.status === "active" && !x.cancel_requested && (
+                          <details>
+                            <summary className="cursor-pointer text-xs font-semibold text-alert">Cancel…</summary>
+                            <form action="/api/admin/subscriptions/cancel" method="post" className="mt-2">
+                              <input type="hidden" name="subscription_id" value={x.razorpay_subscription_id} />
+                              <button
+                                type="submit"
+                                className="rounded-full bg-alert px-3 py-1 text-xs font-semibold text-white"
+                              >
+                                Stop renewals
+                              </button>
+                            </form>
+                          </details>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!subscriptions?.length && (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-slate">
+                      No auto-renew subscriptions yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="mt-12">
           <h2 className="font-display text-xl text-ink">
             Payments ({payments?.filter((p) => p.status === "paid").length ?? 0} paid)
           </h2>
@@ -106,7 +209,7 @@ export default async function AdminPage() {
                     </td>
                     <td className="px-4 py-3">{p.phone}</td>
                     <td className="px-4 py-3 capitalize">
-                      {p.plan} ({termLabel(p.term)})
+                      {planName(p.plan)} ({termLabel(p.term)})
                     </td>
                     <td className="px-4 py-3">{formatAmount(p.amount, p.currency)}</td>
                     <td className="px-4 py-3 font-mono text-xs">{p.razorpay_payment_id || "—"}</td>
@@ -151,7 +254,7 @@ export default async function AdminPage() {
                     <td className="px-4 py-3">{w.phone}</td>
                     <td className="px-4 py-3">{w.pincode || "—"}</td>
                     <td className="px-4 py-3 capitalize">
-                      {w.plan || "—"} {w.billing_cycle ? `(${termLabel(w.billing_cycle)})` : ""}
+                      {planName(w.plan) || "—"} {w.billing_cycle ? `(${termLabel(w.billing_cycle)})` : ""}
                     </td>
                     <td className="px-4 py-3 text-slate">
                       {new Date(w.created_at).toLocaleDateString()}
@@ -188,7 +291,7 @@ export default async function AdminPage() {
                 {customers?.map((c) => (
                   <tr key={c.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-3">{c.full_name || "—"}</td>
-                    <td className="px-4 py-3 capitalize">{c.plan || "—"}</td>
+                    <td className="px-4 py-3 capitalize">{planName(c.plan) || "—"}</td>
                     <td className="px-4 py-3 capitalize">{c.billing_cycle}</td>
                     <td className="px-4 py-3 text-slate">
                       {new Date(c.created_at).toLocaleDateString()}

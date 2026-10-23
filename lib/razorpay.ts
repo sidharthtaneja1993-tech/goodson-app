@@ -74,3 +74,72 @@ export function verifyWebhookSignature(rawBody: string, signature: string) {
   const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
   return safeEqual(expected, signature);
 }
+
+// ---------------------------------------------------------------------------
+// Subscriptions (auto-renewal)
+// ---------------------------------------------------------------------------
+
+function authHeader() {
+  return (
+    "Basic " +
+    Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString("base64")
+  );
+}
+
+/** Small wrapper around the Razorpay REST API. Throws with Razorpay's own message on errors. */
+export async function rzp<T = Record<string, unknown>>(
+  method: "GET" | "POST",
+  path: string,
+  body?: unknown
+): Promise<T> {
+  const res = await fetch(`https://api.razorpay.com/v1${path}`, {
+    method,
+    headers: { Authorization: authHeader(), "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.description || `Razorpay ${path} failed`);
+  return data as T;
+}
+
+type Price = NonNullable<ReturnType<typeof priceFor>>;
+
+/**
+ * Razorpay needs a "plan" for every price + billing period. We create them
+ * on first use and remember the id in the razorpay_plans table.
+ */
+export async function getOrCreatePlanId(
+  db: { from: (t: string) => any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  price: Price
+) {
+  const key = `${price.plan.id}:${price.term.id}:${price.currency}:${price.amount}`;
+  const { data: existing } = await db
+    .from("razorpay_plans")
+    .select("razorpay_plan_id")
+    .eq("key", key)
+    .maybeSingle();
+  if (existing?.razorpay_plan_id) return existing.razorpay_plan_id as string;
+
+  const plan = await rzp<{ id: string }>("POST", "/plans", {
+    period: "monthly",
+    interval: price.term.months,
+    item: {
+      name: `Goodson ${price.plan.name} · ${price.term.label}`,
+      amount: price.amount,
+      currency: price.currency,
+      description: `Renews every ${price.term.label}`,
+    },
+    notes: { plan: price.plan.id, term: price.term.id },
+  });
+  await db.from("razorpay_plans").insert({ key, razorpay_plan_id: plan.id });
+  return plan.id;
+}
+
+/** Checks the signature Razorpay Checkout returns after a subscription's first payment. */
+export function verifySubscriptionSignature(paymentId: string, subscriptionId: string, signature: string) {
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
+    .update(`${paymentId}|${subscriptionId}`)
+    .digest("hex");
+  return safeEqual(expected, signature);
+}

@@ -9,6 +9,7 @@ import {
   getPlan,
   getTerm,
   termTotalUSD,
+  renewEvery,
   type CurrencyCode,
   type PlanId,
   type TermId,
@@ -17,10 +18,13 @@ import {
 type Step = "plan" | "term" | "details" | "done" | "paid";
 
 type RazorpayResponse = {
-  razorpay_order_id: string;
+  razorpay_order_id?: string;
+  razorpay_subscription_id?: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
 };
+
+type Billing = "auto" | "once";
 
 declare global {
   interface Window {
@@ -65,6 +69,8 @@ export default function SubscribeModal({
   const [state, setState] = useState<"idle" | "submitting" | "paying" | "error">("idle");
   const [notice, setNotice] = useState<string | null>(null);
   const [paidDisplay, setPaidDisplay] = useState<string>("");
+  const [billing, setBilling] = useState<Billing>("auto");
+  const [paidAuto, setPaidAuto] = useState(false);
 
   useEffect(() => {
     // Reset the flow each time the popup opens. If a plan card was clicked,
@@ -76,6 +82,7 @@ export default function SubscribeModal({
       setStep(initialPlan ? "term" : "plan");
       setState("idle");
       setNotice(null);
+      setBilling("auto");
     }
   }, [open, initialPlan]);
 
@@ -104,27 +111,64 @@ export default function SubscribeModal({
       });
       if (!lead.ok) throw new Error("failed");
 
-      // 2. Create a Razorpay order on the server (price is worked out there).
-      const orderRes = await fetch("/api/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: plan.id,
-          term: term.id,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          pincode: form.pincode,
-        }),
-      });
-      if (orderRes.status === 503) {
-        // Payments not switched on yet: fall back to "we'll send you a link".
-        setStep("done");
-        setState("idle");
-        return;
+      const details = {
+        plan: plan.id,
+        term: term.id,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        pincode: form.pincode,
+      };
+      const post = (url: string, body: unknown) =>
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+      // 2a. Auto-renew: create a Razorpay subscription on the server.
+      let mode: Billing = billing;
+      let checkout: Record<string, unknown> | null = null;
+      let display = "";
+      if (mode === "auto") {
+        const subRes = await post("/api/razorpay/subscription", details);
+        if (subRes.status === 503) {
+          mode = "once"; // auto-renew not switched on yet - quietly pay once instead
+        } else {
+          const sub = await subRes.json();
+          if (!subRes.ok) {
+            setBilling("once");
+            setState("idle");
+            setNotice(
+              "Automatic renewal isn't available for this plan right now. We've switched you to \"Pay once\" - just tap the button again."
+            );
+            return;
+          }
+          checkout = { key: sub.keyId, subscription_id: sub.subscriptionId, notes: sub.notes };
+          display = sub.display;
+        }
       }
-      const order = await orderRes.json();
-      if (!orderRes.ok) throw new Error(order?.error || "order failed");
+
+      // 2b. Pay once: create a one-time Razorpay order on the server.
+      if (mode === "once") {
+        const orderRes = await post("/api/razorpay/order", details);
+        if (orderRes.status === 503) {
+          // Payments not switched on yet: fall back to "we'll send you a link".
+          setStep("done");
+          setState("idle");
+          return;
+        }
+        const order = await orderRes.json();
+        if (!orderRes.ok) throw new Error(order?.error || "order failed");
+        checkout = {
+          key: order.keyId,
+          order_id: order.orderId,
+          amount: order.amount,
+          currency: order.currency,
+          notes: order.notes,
+        };
+        display = order.display;
+      }
 
       // 3. Open Razorpay Checkout.
       const ok = await loadRazorpay();
@@ -132,24 +176,21 @@ export default function SubscribeModal({
 
       setState("paying");
       const rzp = new window.Razorpay({
-        key: order.keyId,
-        order_id: order.orderId,
-        amount: order.amount,
-        currency: order.currency,
+        ...checkout,
         name: "Goodson",
-        description: `${plan.name} · ${term.label}`,
+        description:
+          mode === "auto" ? `${plan.name} · renews every ${renewEvery(term.id)}` : `${plan.name} · ${term.label}`,
         prefill: { name: form.name, email: form.email, contact: form.phone },
-        notes: order.notes,
         theme: { color: "#3A2E22" },
         handler: async (resp: RazorpayResponse) => {
           setState("submitting");
-          const v = await fetch("/api/razorpay/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(resp),
-          });
+          const v = await post(
+            mode === "auto" ? "/api/razorpay/subscription/verify" : "/api/razorpay/verify",
+            resp
+          );
           if (v.ok) {
-            setPaidDisplay(order.display);
+            setPaidDisplay(display);
+            setPaidAuto(mode === "auto");
             setStep("paid");
             setState("idle");
           } else {
@@ -162,7 +203,11 @@ export default function SubscribeModal({
         modal: {
           ondismiss: () => {
             setState("idle");
-            setNotice("Payment wasn't completed. You can try again, or message us on WhatsApp for help.");
+            setNotice(
+              mode === "auto"
+                ? "Payment wasn't completed. If your card doesn't support automatic renewals, choose \"Pay once\" and try again."
+                : "Payment wasn't completed. You can try again, or message us on WhatsApp for help."
+            );
           },
         },
       });
@@ -349,6 +394,40 @@ export default function SubscribeModal({
               />
             </div>
 
+            <fieldset className="space-y-2">
+              <legend className={label}>How would you like to pay?</legend>
+              {([
+                ["auto", "Renew automatically", `Charged every ${renewEvery(term.id)}. Cancel anytime on WhatsApp.`, "Recommended"],
+                ["once", "Pay once", `Covers ${term.label}. We'll remind you before it ends.`, ""],
+              ] as [Billing, string, string, string][]).map(([value, title, sub, badge]) => (
+                <label
+                  key={value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
+                    billing === value ? "border-ink bg-linen" : "border-line hover:border-slate"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="billing"
+                    checked={billing === value}
+                    onChange={() => setBilling(value)}
+                    className="mt-1 accent-[#3A2E22]"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold text-ink">
+                      {title}
+                      {badge && (
+                        <span className="ml-2 rounded bg-go-soft px-1.5 py-0.5 text-[11px] font-semibold text-go">
+                          {badge}
+                        </span>
+                      )}
+                    </span>
+                    <span className="block text-xs text-slate">{sub}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+
             {notice && (
               <p className={`rounded-lg px-3 py-2 text-sm ${state === "error" ? "bg-alert-soft text-alert" : "bg-linen text-ink"}`}>
                 {notice}
@@ -372,13 +451,25 @@ export default function SubscribeModal({
                   ? "Please wait…"
                   : state === "paying"
                     ? "Complete payment in the Razorpay window…"
-                    : `Pay securely · ${money(termTotalUSD(plan.monthly, term))}`}
+                    : billing === "auto"
+                      ? `Subscribe · ${money(termTotalUSD(plan.monthly, term))} every ${renewEvery(term.id)}`
+                      : `Pay once · ${money(termTotalUSD(plan.monthly, term))}`}
               </button>
             </div>
             <p className="text-center text-xs text-slate">
-              Secure payment by Razorpay. One-time payment for {term.label}.{" "}
-              <strong className="text-go">No auto-renewal</strong> - we&apos;ll remind you on WhatsApp
-              before your plan ends.
+              Secure payment by Razorpay.{" "}
+              {billing === "auto" ? (
+                <>
+                  Renews automatically every {renewEvery(term.id)}. We&apos;ll email you a reminder before each
+                  renewal, and you can <strong className="text-go">cancel anytime</strong> on WhatsApp.
+                </>
+              ) : (
+                <>
+                  One-time payment for {term.label}.{" "}
+                  <strong className="text-go">No auto-renewal</strong> - we&apos;ll remind you before your
+                  plan ends.
+                </>
+              )}
             </p>
           </form>
         )}
@@ -391,7 +482,8 @@ export default function SubscribeModal({
             </div>
             <p className="font-display text-xl text-ink">Payment received - thank you, {form.name}.</p>
             <p className="mt-2 text-sm text-slate">
-              {plan.name} · {term.label} · {paidDisplay}. A receipt is on its way to {form.email}.
+              {plan.name} · {term.label} · {paidDisplay}
+              {paidAuto ? ", renews automatically" : ""}. A receipt is on its way to {form.email}.
               We&apos;ll WhatsApp you shortly to book your onboarding call and first visit.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3">

@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { whatsappLink } from "@/lib/whatsapp";
 import {
   CURRENCIES,
   PLANS,
+  ADD_ONS,
+  REMOTE_FOOTNOTE,
+  type Region,
   MAX_DISCOUNT,
   formatMoney,
   type CurrencyCode,
@@ -17,6 +21,14 @@ export default function PricingSection({
 }) {
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [rates, setRates] = useState<Record<string, number> | null>(null);
+  const [region, setRegion] = useState<Region>("ncr");
+
+  useEffect(() => {
+    // The PIN checker sends visitors here with "remote" selected.
+    const onRegion = (e: Event) => setRegion((e as CustomEvent<Region>).detail);
+    window.addEventListener("goodson:region", onRegion);
+    return () => window.removeEventListener("goodson:region", onRegion);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,7 +60,27 @@ export default function PricingSection({
           Choose the level of presence your family needs
         </h2>
 
-        <div className="mt-10 flex flex-wrap items-center gap-4">
+        <div className="mt-10">
+          <p className="mb-3 text-sm font-semibold text-ink">Where do your parents live?</p>
+          <div className="inline-flex flex-wrap rounded-2xl border border-line bg-paper p-1">
+            {([
+              ["ncr", "Delhi NCR"],
+              ["remote", "Elsewhere in India"],
+            ] as [Region, string][]).map(([r, label]) => (
+              <button
+                key={r}
+                onClick={() => setRegion(r)}
+                className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors ${
+                  region === r ? "bg-ink text-paper" : "text-slate hover:text-ink"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-4">
           <p className="rounded-full border border-line bg-paper px-4 py-2 text-sm text-slate">
             Subscribe for 1, 3, 6 or 12 months ·{" "}
             <span className="font-semibold text-go">
@@ -73,8 +105,8 @@ export default function PricingSection({
           </label>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {PLANS.map((plan) => (
+        <div className={`mt-10 grid gap-6 ${region === "ncr" ? "md:grid-cols-3" : "md:grid-cols-[1.2fr_1fr]"}`}>
+          {PLANS.filter((p) => p.region === region).map((plan) => (
             <div
               key={plan.id}
               className={`flex flex-col rounded-2xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
@@ -88,6 +120,11 @@ export default function PricingSection({
                   Most chosen
                 </span>
               )}
+              {plan.listMonthly && (
+                <span className="mb-4 w-fit rounded-full bg-go-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-go">
+                  Founding families · limited spots
+                </span>
+              )}
               <h3 className="font-display text-2xl">{plan.name}</h3>
               <p
                 className={`mt-1 text-sm ${
@@ -98,6 +135,11 @@ export default function PricingSection({
               </p>
 
               <div className="mt-6 flex items-baseline gap-1">
+                {plan.listMonthly && (
+                  <span className="mr-2 text-xl text-slate line-through">
+                    {formatMoney(plan.listMonthly, currency, rate)}
+                  </span>
+                )}
                 <span className="font-display text-4xl">
                   {formatMoney(plan.monthly, currency, rate)}
                 </span>
@@ -144,7 +186,63 @@ export default function PricingSection({
               </button>
             </div>
           ))}
+          {region === "remote" && (
+            <div className="flex flex-col justify-between rounded-2xl border border-dashed border-line bg-paper/60 p-8">
+              <div>
+                <span className="w-fit rounded-full bg-linen px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate">
+                  Coming to more cities
+                </span>
+                <h3 className="font-display mt-4 text-2xl text-ink">Guardian &amp; Prestige</h3>
+                <p className="mt-2 text-sm text-slate">
+                  Regular visits, escorts, errands and a dedicated concierge are available in Delhi NCR
+                  today. We open new cities where families ask for us. Start with Companion Remote and
+                  you&apos;ll be first to upgrade when we launch near your parents.
+                </p>
+              </div>
+              <a
+                href={whatsappLink("Hi Goodson, please let me know when Guardian is available in my parents' city.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 w-fit rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink hover:border-ink"
+              >
+                Tell me when it&apos;s in my city
+              </a>
+            </div>
+          )}
         </div>
+
+        <div className="mt-10 rounded-2xl border border-line bg-paper p-6 sm:p-8">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-widest text-slate">Add-ons</p>
+              <h3 className="font-display mt-1 text-2xl text-ink">Extra help, only when you need it</h3>
+            </div>
+            <a
+              href={whatsappLink("Hi Goodson, I'd like to book an add-on for my parents.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-go hover:underline"
+            >
+              Book an add-on on WhatsApp →
+            </a>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ADD_ONS[region].map((a) => (
+              <div key={a.name} className="flex flex-col rounded-xl bg-linen p-4">
+                <p className="text-sm font-semibold text-ink">{a.name}</p>
+                <p className="mt-1 flex-1 text-xs leading-relaxed text-slate">{a.detail}</p>
+                <p className="mt-3 text-sm">
+                  <span className="font-display text-xl text-go">{a.price}</span>
+                  <span className="text-xs text-slate"> · {a.where}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {region === "remote" && (
+          <p className="mt-6 max-w-3xl text-xs leading-relaxed text-slate">{REMOTE_FOOTNOTE}</p>
+        )}
       </div>
     </section>
   );
