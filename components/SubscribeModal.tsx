@@ -471,6 +471,17 @@ export default function SubscribeModal({
                 </>
               )}
             </p>
+            <p className="text-center text-[11px] text-slate">
+              By subscribing, you agree to our{" "}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-ink underline">
+                Terms
+              </a>{" "}
+              and{" "}
+              <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="text-ink underline">
+                Cancellation &amp; Refund Policy
+              </a>
+              {billing === "auto" ? ", including automatic renewal until you cancel." : "."}
+            </p>
           </form>
         )}
 

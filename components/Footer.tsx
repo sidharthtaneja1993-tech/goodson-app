@@ -38,7 +38,7 @@ export default function Footer() {
             Terms of Service
           </Link>
           <Link href="/refund-policy" className="hover:text-paper">
-            Refund &amp; Cancellation Policy
+            Cancellation &amp; Refund Policy
           </Link>
         </nav>
       </div>
