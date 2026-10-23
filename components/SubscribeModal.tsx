@@ -24,8 +24,6 @@ type RazorpayResponse = {
   razorpay_signature: string;
 };
 
-type Billing = "auto" | "once";
-
 declare global {
   interface Window {
     Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
@@ -69,8 +67,6 @@ export default function SubscribeModal({
   const [state, setState] = useState<"idle" | "submitting" | "paying" | "error">("idle");
   const [notice, setNotice] = useState<string | null>(null);
   const [paidDisplay, setPaidDisplay] = useState<string>("");
-  const [billing, setBilling] = useState<Billing>("auto");
-  const [paidAuto, setPaidAuto] = useState(false);
   const [onboardingToken, setOnboardingToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,7 +79,6 @@ export default function SubscribeModal({
       setStep(initialPlan ? "term" : "plan");
       setState("idle");
       setNotice(null);
-      setBilling("auto");
     }
   }, [open, initialPlan]);
 
@@ -127,49 +122,24 @@ export default function SubscribeModal({
           body: JSON.stringify(body),
         });
 
-      // 2a. Auto-renew: create a Razorpay subscription on the server.
-      let mode: Billing = billing;
-      let checkout: Record<string, unknown> | null = null;
-      let display = "";
-      if (mode === "auto") {
-        const subRes = await post("/api/razorpay/subscription", details);
-        if (subRes.status === 503) {
-          mode = "once"; // auto-renew not switched on yet - quietly pay once instead
-        } else {
-          const sub = await subRes.json();
-          if (!subRes.ok) {
-            setBilling("once");
-            setState("idle");
-            setNotice(
-              "Automatic renewal isn't available for this plan right now. We've switched you to \"Pay once\" - just tap the button again."
-            );
-            return;
-          }
-          checkout = { key: sub.keyId, subscription_id: sub.subscriptionId, notes: sub.notes };
-          display = sub.display;
-        }
+      // 2. Create an auto-renewing Razorpay subscription on the server.
+      const subRes = await post("/api/razorpay/subscription", details);
+      if (subRes.status === 503) {
+        // Payments not switched on yet: fall back to "we'll send you a link".
+        setStep("done");
+        setState("idle");
+        return;
       }
-
-      // 2b. Pay once: create a one-time Razorpay order on the server.
-      if (mode === "once") {
-        const orderRes = await post("/api/razorpay/order", details);
-        if (orderRes.status === 503) {
-          // Payments not switched on yet: fall back to "we'll send you a link".
-          setStep("done");
-          setState("idle");
-          return;
-        }
-        const order = await orderRes.json();
-        if (!orderRes.ok) throw new Error(order?.error || "order failed");
-        checkout = {
-          key: order.keyId,
-          order_id: order.orderId,
-          amount: order.amount,
-          currency: order.currency,
-          notes: order.notes,
-        };
-        display = order.display;
+      const sub = await subRes.json();
+      if (!subRes.ok) {
+        setState("error");
+        setNotice(
+          "We couldn't start your subscription just now. Please try again in a minute, or message us on WhatsApp and we'll help."
+        );
+        return;
       }
+      const checkout = { key: sub.keyId, subscription_id: sub.subscriptionId, notes: sub.notes };
+      const display: string = sub.display;
 
       // 3. Open Razorpay Checkout.
       const ok = await loadRazorpay();
@@ -179,21 +149,16 @@ export default function SubscribeModal({
       const rzp = new window.Razorpay({
         ...checkout,
         name: "Goodson",
-        description:
-          mode === "auto" ? `${plan.name} · renews every ${renewEvery(term.id)}` : `${plan.name} · ${term.label}`,
+        description: `${plan.name} · renews every ${renewEvery(term.id)}`,
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#3A2E22" },
         handler: async (resp: RazorpayResponse) => {
           setState("submitting");
-          const v = await post(
-            mode === "auto" ? "/api/razorpay/subscription/verify" : "/api/razorpay/verify",
-            resp
-          );
+          const v = await post("/api/razorpay/subscription/verify", resp);
           if (v.ok) {
             const vd = await v.json().catch(() => ({}));
             setOnboardingToken(vd?.onboardingToken ?? null);
             setPaidDisplay(display);
-            setPaidAuto(mode === "auto");
             setStep("paid");
             setState("idle");
           } else {
@@ -207,9 +172,7 @@ export default function SubscribeModal({
           ondismiss: () => {
             setState("idle");
             setNotice(
-              mode === "auto"
-                ? "Payment wasn't completed. If your card doesn't support automatic renewals, choose \"Pay once\" and try again."
-                : "Payment wasn't completed. You can try again, or message us on WhatsApp for help."
+              "Payment wasn't completed. You can try again with another card, or message us on WhatsApp for help."
             );
           },
         },
@@ -397,40 +360,6 @@ export default function SubscribeModal({
               />
             </div>
 
-            <fieldset className="space-y-2">
-              <legend className={label}>How would you like to pay?</legend>
-              {([
-                ["auto", "Renew automatically", `Charged every ${renewEvery(term.id)}. Cancel anytime on WhatsApp.`, "Recommended"],
-                ["once", "Pay once", `Covers ${term.label}. We'll remind you before it ends.`, ""],
-              ] as [Billing, string, string, string][]).map(([value, title, sub, badge]) => (
-                <label
-                  key={value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                    billing === value ? "border-ink bg-linen" : "border-line hover:border-slate"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="billing"
-                    checked={billing === value}
-                    onChange={() => setBilling(value)}
-                    className="mt-1 accent-[#3A2E22]"
-                  />
-                  <span>
-                    <span className="block text-sm font-semibold text-ink">
-                      {title}
-                      {badge && (
-                        <span className="ml-2 rounded bg-go-soft px-1.5 py-0.5 text-[11px] font-semibold text-go">
-                          {badge}
-                        </span>
-                      )}
-                    </span>
-                    <span className="block text-xs text-slate">{sub}</span>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-
             {notice && (
               <p className={`rounded-lg px-3 py-2 text-sm ${state === "error" ? "bg-alert-soft text-alert" : "bg-linen text-ink"}`}>
                 {notice}
@@ -454,25 +383,13 @@ export default function SubscribeModal({
                   ? "Please wait…"
                   : state === "paying"
                     ? "Complete payment in the Razorpay window…"
-                    : billing === "auto"
-                      ? `Subscribe · ${money(termTotalUSD(plan.monthly, term))} every ${renewEvery(term.id)}`
-                      : `Pay once · ${money(termTotalUSD(plan.monthly, term))}`}
+                    : `Subscribe · ${money(termTotalUSD(plan.monthly, term))} every ${renewEvery(term.id)}`}
               </button>
             </div>
             <p className="text-center text-xs text-slate">
               Secure payment by Razorpay.{" "}
-              {billing === "auto" ? (
-                <>
-                  Renews automatically every {renewEvery(term.id)}. We&apos;ll email you a reminder before each
-                  renewal, and you can <strong className="text-go">cancel anytime</strong> on WhatsApp.
-                </>
-              ) : (
-                <>
-                  One-time payment for {term.label}.{" "}
-                  <strong className="text-go">No auto-renewal</strong> - we&apos;ll remind you before your
-                  plan ends.
-                </>
-              )}
+              Renews automatically every {renewEvery(term.id)}. We&apos;ll email you a reminder before each
+              renewal, and you can <strong className="text-go">cancel anytime</strong> on WhatsApp.
             </p>
             <p className="text-center text-[11px] text-slate">
               By subscribing, you agree to our{" "}
@@ -483,7 +400,7 @@ export default function SubscribeModal({
               <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="text-ink underline">
                 Cancellation &amp; Refund Policy
               </a>
-              {billing === "auto" ? ", including automatic renewal until you cancel." : "."}
+              , including automatic renewal until you cancel.
             </p>
           </form>
         )}
@@ -497,7 +414,7 @@ export default function SubscribeModal({
             <p className="font-display text-xl text-ink">Payment received - thank you, {form.name}.</p>
             <p className="mt-2 text-sm text-slate">
               {plan.name} · {term.label} · {paidDisplay}
-              {paidAuto ? ", renews automatically" : ""}. A receipt is on its way to {form.email}.
+              , renews automatically. A receipt is on its way to {form.email}.
             </p>
             {onboardingToken ? (
               <div className="mt-6 rounded-xl bg-linen p-4 text-left">

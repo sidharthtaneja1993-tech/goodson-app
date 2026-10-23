@@ -16,21 +16,11 @@ export default function RefundPolicyPage() {
 
       <h2>How you pay</h2>
       <p>
-        When you subscribe, you choose a plan length of 1, 3, 6 or 12 months,
-        and one of two ways to pay:
+        When you subscribe, you choose a plan length of 1, 3, 6 or 12 months.
+        You are charged for that length now, and the same amount is charged
+        automatically at the start of each new period (every month, 3 months, 6
+        months or year) until you cancel.
       </p>
-      <ul>
-        <li>
-          <strong>Renew automatically:</strong> you are charged for your chosen
-          length now, and the same amount is charged automatically at the start
-          of each new period (every month, 3 months, 6 months or year) until you
-          cancel.
-        </li>
-        <li>
-          <strong>Pay once:</strong> you pay for your chosen length only. Your
-          plan does not renew; we will remind you before it ends.
-        </li>
-      </ul>
       <p>
         All payments are made in advance and processed securely by our payment
         partner, Razorpay.

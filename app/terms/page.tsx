@@ -59,8 +59,8 @@ export default function TermsPage() {
 
       <h2>Plans, payments and automatic renewal</h2>
       <p>
-        You choose a plan length of 1, 3, 6 or 12 months and either automatic
-        renewal or a one-time payment. With automatic renewal, you authorise us
+        You choose a plan length of 1, 3, 6 or 12 months. Every plan renews
+        automatically: you authorise us
         (through our payment partner, Razorpay) to charge your payment method at
         the start of each new period until you cancel. We will email a reminder
         before each renewal. Prices are shown on our pricing page; any change
