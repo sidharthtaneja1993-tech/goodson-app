@@ -143,9 +143,15 @@ export default function KeysPage() {
             <div className="max-w-[92%] rounded-xl rounded-tl-sm bg-white p-3 text-[13px] leading-snug text-[#111] shadow-sm">
               <p className="mb-2 font-semibold">🏠 Monthly visit · 12 Oct</p>
               <div className="mb-2 grid grid-cols-3 gap-1.5">
-                {["Living room", "Kitchen", "Bathroom"].map((r) => (
-                  <div key={r} className="flex aspect-square items-end rounded-md bg-gradient-to-br from-[#d8cbb8] to-[#b9a68c] p-1">
-                    <span className="rounded bg-black/40 px-1 text-[9px] text-white">{r}</span>
+                {[
+                  ["Living room", "/images/keys/living-room.jpg"],
+                  ["Kitchen", "/images/keys/kitchen.jpg"],
+                  ["Bathroom", "/images/keys/bathroom.jpg"],
+                ].map(([r, src]) => (
+                  <div key={r} className="relative aspect-square overflow-hidden rounded-md bg-[#d8cbb8]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`${r} photo from a Goodson Keys visit`} className="h-full w-full object-cover" />
+                    <span className="absolute bottom-1 left-1 rounded bg-black/50 px-1 text-[9px] text-white">{r}</span>
                   </div>
                 ))}
               </div>
