@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { WHATSAPP_DISPLAY, whatsappLink } from "@/lib/whatsapp";
 
-export default function Footer() {
+// variant="keys" is used on the Goodson Keys (property care) pages.
+export default function Footer({ variant = "care" }: { variant?: "care" | "keys" }) {
+  const keys = variant === "keys";
   return (
     <footer className="bg-ink px-6 py-12 text-slate-dark sm:px-10">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display text-lg text-paper">Goodson</p>
+          <p className="font-display text-lg text-paper">{keys ? "Goodson Keys" : "Goodson"}</p>
           <p className="mt-1 text-sm">
-            Concierge care for parents in India, coordinated for families abroad.
+            {keys
+              ? "Property care in Delhi NCR, for owners living abroad."
+              : "Concierge care for parents in India, coordinated for families abroad."}
           </p>
           <p className="mt-4 text-sm">
             <a
@@ -31,6 +35,15 @@ export default function Footer() {
         </div>
 
         <nav className="flex flex-col gap-2 text-sm sm:items-end">
+          {keys ? (
+            <Link href="/" className="font-semibold text-paper hover:text-marigold">
+              Goodson · Care for your parents
+            </Link>
+          ) : (
+            <Link href="/keys" className="font-semibold text-paper hover:text-marigold">
+              Goodson Keys · Property care
+            </Link>
+          )}
           <Link href="/privacy" className="hover:text-paper">
             Privacy Policy
           </Link>

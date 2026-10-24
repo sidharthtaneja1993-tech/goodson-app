@@ -14,6 +14,7 @@ import SubscribeModal from "@/components/SubscribeModal";
 import FadeIn from "@/components/FadeIn";
 import CounterStat from "@/components/CounterStat";
 import UpdatesHook from "@/components/UpdatesHook";
+import HomeCareHook from "@/components/HomeCareHook";
 import type { CurrencyCode, PlanId } from "@/lib/plans";
 
 export default function Home() {
@@ -120,6 +121,7 @@ export default function Home() {
 
       <ServicesSection />
       <UpdatesHook />
+      <HomeCareHook />
       <TestimonialsSection />
       <PricingSection
         onSelectPlan={(plan, cur, r) => {
