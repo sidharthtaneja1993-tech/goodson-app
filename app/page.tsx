@@ -15,6 +15,7 @@ import FadeIn from "@/components/FadeIn";
 import CounterStat from "@/components/CounterStat";
 import UpdatesHook from "@/components/UpdatesHook";
 import HomeCareHook from "@/components/HomeCareHook";
+import KeysBar from "@/components/KeysBar";
 import type { CurrencyCode, PlanId } from "@/lib/plans";
 
 export default function Home() {
@@ -30,6 +31,7 @@ export default function Home() {
 
   return (
     <main>
+      <KeysBar />
       <section className="relative overflow-hidden bg-linen px-6 pb-24 pt-40 text-charcoal sm:px-10 sm:pt-48">
         <Header />
         <div className="mx-auto max-w-6xl">

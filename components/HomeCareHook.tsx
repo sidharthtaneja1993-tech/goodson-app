@@ -15,7 +15,7 @@ export default function HomeCareHook() {
                 Own a flat or house in Delhi NCR?
               </h3>
               <p className="mt-1 text-sm text-slate-dark">
-                Inspections with photos, bills paid, tenants found and managed. From $29/mo.
+                Inspections with photos, bills paid, tenants found and managed. From $39/mo.
               </p>
             </div>
           </div>

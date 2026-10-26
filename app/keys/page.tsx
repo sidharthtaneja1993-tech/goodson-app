@@ -12,7 +12,7 @@ export const metadata = {
 const PLANS = [
   {
     name: "Empty Home",
-    price: "$29",
+    price: "$39",
     per: "/mo",
     tagline: "For a flat or house no one lives in",
     features: [
@@ -26,7 +26,7 @@ const PLANS = [
   },
   {
     name: "Rented Home",
-    price: "$49",
+    price: "$59",
     per: "/mo",
     tagline: "For a property with a tenant",
     features: [
