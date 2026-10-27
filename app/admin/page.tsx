@@ -54,6 +54,10 @@ export default async function AdminPage({
     .order("created_at", { ascending: false })
     .limit(200);
 
+  // A subscription is created in Razorpay the moment someone clicks Subscribe,
+  // before they pay. Only show ones that got past that first payment.
+  const realSubs = (subscriptions ?? []).filter((x) => x.status !== "created");
+
   // Emails that have actually paid, so leads can be marked paid / not paid.
   const paidEmails = new Set(
     [
@@ -220,7 +224,7 @@ export default async function AdminPage({
                 </tr>
               </thead>
               <tbody>
-                {subscriptions?.map((x) => {
+                {realSubs.map((x) => {
                   const label = x.cancel_requested && x.status === "active" ? "ends at period end" : x.status;
                   const tone =
                     x.status === "active" && !x.cancel_requested
@@ -268,7 +272,7 @@ export default async function AdminPage({
                     </tr>
                   );
                 })}
-                {!subscriptions?.length && (
+                {!realSubs.length && (
                   <tr>
                     <td colSpan={7} className="px-4 py-6 text-center text-slate">
                       No auto-renew subscriptions yet.
