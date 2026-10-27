@@ -10,6 +10,8 @@ import {
   type Region,
   MAX_DISCOUNT,
   formatMoney,
+  currencyForCountry,
+  isCurrency,
   type CurrencyCode,
   type PlanId,
 } from "@/lib/plans";
@@ -29,6 +31,48 @@ export default function PricingSection({
     window.addEventListener("goodson:region", onRegion);
     return () => window.removeEventListener("goodson:region", onRegion);
   }, []);
+
+  // Show prices in the visitor's own currency: their earlier choice if they
+  // made one, otherwise the currency of the country they're browsing from.
+  useEffect(() => {
+    let cancelled = false;
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem("goodson:currency");
+    } catch {}
+    if (isCurrency(saved)) {
+      const choice = saved;
+      queueMicrotask(() => {
+        if (!cancelled) setCurrency(choice);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    const fromLanguage = () => {
+      const region = (navigator.language || "").split("-")[1];
+      return currencyForCountry(region);
+    };
+    fetch("/api/geo")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        setCurrency(data?.country ? currencyForCountry(data.country) : fromLanguage());
+      })
+      .catch(() => {
+        if (!cancelled) setCurrency(fromLanguage());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function chooseCurrency(code: CurrencyCode) {
+    setCurrency(code);
+    try {
+      localStorage.setItem("goodson:currency", code);
+    } catch {}
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -99,17 +143,22 @@ export default function PricingSection({
             Show prices in
             <select
               value={currency}
-              onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+              onChange={(e) => chooseCurrency(e.target.value as CurrencyCode)}
               className="rounded-md border border-line bg-paper px-2 py-1.5 text-charcoal"
             >
               {CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
-                  {c.code}
+                  {c.code} · {c.name}
                 </option>
               ))}
             </select>
           </label>
         </div>
+        {currency !== "USD" && rate && (
+          <p className="mt-3 text-right text-xs text-slate">
+            Prices in {currency} are approximate. You&apos;re billed in US dollars, and your bank converts at its own rate.
+          </p>
+        )}
 
         <div className={`mt-10 grid gap-6 ${region === "ncr" ? "md:grid-cols-3" : "md:grid-cols-[1.2fr_1fr]"}`}>
           {PLANS.filter((p) => p.region === region).map((plan) => (

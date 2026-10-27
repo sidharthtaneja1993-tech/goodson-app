@@ -56,8 +56,8 @@ export default function Header({ variant = "care" }: { variant?: "care" | "keys"
                 New
               </span>
             </Link>
-            <Link href="/login" className="hover:text-ink">
-              Log in
+            <Link href="/#plans" className="font-semibold text-ink hover:text-marigold-deep">
+              Subscribe
             </Link>
           </>
         )}

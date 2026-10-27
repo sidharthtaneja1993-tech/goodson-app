@@ -5,16 +5,51 @@
 export type PlanId = "companion" | "guardian" | "prestige" | "companion_remote";
 export type Region = "ncr" | "remote";
 export type TermId = "1_month" | "3_months" | "6_months" | "12_months";
-export type CurrencyCode = "USD" | "GBP" | "CAD" | "AUD" | "NZD" | "INR";
+export type CurrencyCode =
+  | "USD" | "GBP" | "EUR" | "CAD" | "AUD" | "NZD" | "AED" | "SAR" | "QAR" | "KWD"
+  | "OMR" | "BHD" | "SGD" | "HKD" | "MYR" | "JPY" | "CHF" | "INR";
 
-export const CURRENCIES: { code: CurrencyCode; symbol: string }[] = [
-  { code: "USD", symbol: "$" },
-  { code: "GBP", symbol: "£" },
-  { code: "CAD", symbol: "CA$" },
-  { code: "AUD", symbol: "A$" },
-  { code: "NZD", symbol: "NZ$" },
-  { code: "INR", symbol: "₹" },
+// Prices are set and charged in USD; other currencies are shown as an estimate.
+export const CURRENCIES: { code: CurrencyCode; symbol: string; name: string }[] = [
+  { code: "USD", symbol: "$", name: "US dollar" },
+  { code: "GBP", symbol: "£", name: "British pound" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "CAD", symbol: "CA$", name: "Canadian dollar" },
+  { code: "AUD", symbol: "A$", name: "Australian dollar" },
+  { code: "NZD", symbol: "NZ$", name: "New Zealand dollar" },
+  { code: "AED", symbol: "AED ", name: "UAE dirham" },
+  { code: "SAR", symbol: "SAR ", name: "Saudi riyal" },
+  { code: "QAR", symbol: "QAR ", name: "Qatari riyal" },
+  { code: "KWD", symbol: "KWD ", name: "Kuwaiti dinar" },
+  { code: "OMR", symbol: "OMR ", name: "Omani rial" },
+  { code: "BHD", symbol: "BHD ", name: "Bahraini dinar" },
+  { code: "SGD", symbol: "S$", name: "Singapore dollar" },
+  { code: "HKD", symbol: "HK$", name: "Hong Kong dollar" },
+  { code: "MYR", symbol: "RM", name: "Malaysian ringgit" },
+  { code: "JPY", symbol: "¥", name: "Japanese yen" },
+  { code: "CHF", symbol: "CHF ", name: "Swiss franc" },
+  { code: "INR", symbol: "₹", name: "Indian rupee" },
 ];
+
+const EURO_COUNTRIES = [
+  "AT", "BE", "HR", "CY", "EE", "FI", "FR", "DE", "GR", "IE", "IT", "LV", "LT", "LU",
+  "MT", "NL", "PT", "SK", "SI", "ES",
+];
+const COUNTRY_CURRENCY: Record<string, CurrencyCode> = {
+  US: "USD", GB: "GBP", CA: "CAD", AU: "AUD", NZ: "NZD", AE: "AED", SA: "SAR",
+  QA: "QAR", KW: "KWD", OM: "OMR", BH: "BHD", SG: "SGD", HK: "HKD", MY: "MYR",
+  JP: "JPY", CH: "CHF", IN: "INR",
+  ...Object.fromEntries(EURO_COUNTRIES.map((c) => [c, "EUR" as CurrencyCode])),
+};
+
+/** Currency to show a visitor from this country (2-letter code), or USD. */
+export function currencyForCountry(country: string | null | undefined): CurrencyCode {
+  return (country && COUNTRY_CURRENCY[country.toUpperCase()]) || "USD";
+}
+
+export function isCurrency(code: string | null | undefined): code is CurrencyCode {
+  return CURRENCIES.some((c) => c.code === code);
+}
 
 export const PLANS = [
   {
@@ -135,17 +170,15 @@ export function termLabel(value: string | null | undefined) {
 }
 
 export function formatMoney(usd: number, currency: CurrencyCode, rate: number | null) {
-  const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? "$";
-  const converted = currency === "USD" || !rate ? usd : usd * rate;
-  const shownSymbol = currency !== "USD" && !rate ? "$" : symbol;
-  if (currency === "INR" && rate) {
-    return `${symbol}${Math.round(converted).toLocaleString("en-IN")}`;
+  // No exchange rate yet (or USD): show the real USD price.
+  if (currency === "USD" || !rate) {
+    const decimals = usd % 1 === 0 ? 0 : 2;
+    return `$${usd.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
   }
-  const decimals = converted % 1 === 0 ? 0 : 2;
-  return `${shownSymbol}${converted.toLocaleString(undefined, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  })}`;
+  const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? currency + " ";
+  // Converted prices are estimates, so whole numbers read better than £46.53.
+  const converted = Math.round(usd * rate);
+  return `${symbol}${converted.toLocaleString(currency === "INR" ? "en-IN" : "en-US")}`;
 }
 
 // One-off extras, booked on WhatsApp and paid by payment link.

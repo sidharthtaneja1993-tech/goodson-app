@@ -52,7 +52,7 @@ export default function TermsPage() {
           Provide accurate information about your parent(s), including relevant
           medical information and local emergency contacts
         </li>
-        <li>Keep your account details confidential</li>
+        <li>Keep the private links we email you (such as your parents&apos; details form) confidential</li>
         <li>Keep your payment method valid if your plan renews automatically</li>
         <li>Respond promptly when we coordinate requests with you</li>
       </ul>
@@ -100,7 +100,7 @@ export default function TermsPage() {
       <p>
         You may cancel at any time as described above. Goodson may pause or end
         services if a payment is not completed within 7 days of its due date, or
-        if an account misuses the service or provides false information.
+        if a customer misuses the service or provides false information.
       </p>
 
       <h2>Changes to these Terms</h2>

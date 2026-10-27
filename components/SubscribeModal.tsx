@@ -386,6 +386,15 @@ export default function SubscribeModal({
                     : `Subscribe · ${money(termTotalUSD(plan.monthly, term))} every ${renewEvery(term.id)}`}
               </button>
             </div>
+            {currency !== "USD" && rate && (
+              <p className="text-center text-xs text-slate">
+                You&apos;ll be charged{" "}
+                <strong className="text-ink">
+                  {formatMoney(termTotalUSD(plan.monthly, term), "USD", 1)} USD
+                </strong>
+                . The {currency} amount is an estimate; your bank converts at its own rate.
+              </p>
+            )}
             <p className="text-center text-xs text-slate">
               Secure payment by Razorpay.{" "}
               Renews automatically every {renewEvery(term.id)}. We&apos;ll email you a reminder before each

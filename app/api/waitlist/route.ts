@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getResendClient } from "@/lib/email/resend";
-import { confirmationEmail, notificationEmail } from "@/lib/email/templates";
+import { notificationEmail } from "@/lib/email/templates";
 import { getPlan, getTerm, termLabel, termTotalUSD } from "@/lib/plans";
 
 export async function POST(req: NextRequest) {
@@ -51,10 +51,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Send the confirmation + team notification emails. This never blocks
-  // or fails the signup — the lead is already saved in Supabase above,
-  // so an email hiccup (or RESEND_API_KEY not being set yet) shouldn't
-  // turn into a broken waitlist form for the visitor.
+  // Tell the team someone started checkout. The customer gets no email here:
+  // they're about to pay, and the payment receipt is their confirmation.
+  // If they don't pay, the daily job (api/cron/renewal-reminders) sends them
+  // one friendly follow-up the next day.
   const resend = getResendClient();
   if (resend) {
     const fromAddress =
@@ -71,13 +71,7 @@ export async function POST(req: NextRequest) {
       message,
     };
 
-    const emailJobs = [
-      resend.emails.send({
-        from: fromAddress,
-        to: email,
-        ...confirmationEmail(details),
-      }),
-    ];
+    const emailJobs: Promise<unknown>[] = [];
 
     if (notifyTo) {
       emailJobs.push(

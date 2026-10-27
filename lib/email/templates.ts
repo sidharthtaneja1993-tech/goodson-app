@@ -97,9 +97,10 @@ export function notificationEmail(d: WaitlistDetails) {
       : "";
 
   return {
-    subject: `New subscription request: ${d.name}`,
+    subject: `Started checkout: ${d.name}`,
     html: wrap(`
-      <h1 style="margin:0 0 16px;font-size:20px;color:${brand.ink};">New subscription request</h1>
+      <h1 style="margin:0 0 16px;font-size:20px;color:${brand.ink};">Someone started checkout</h1>
+      <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;">You'll get a separate "Paid" email if they complete payment. If not, WhatsApp them within a day.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:14px;font-family:Arial,sans-serif;">
         ${row("Name", d.name)}
         ${row("Email", d.email)}
@@ -298,6 +299,38 @@ export function intakeNotificationEmail(d: {
         ${row("Notes", d.data.notes)}
       </table>
       <p style="margin:16px 0 0;color:${brand.slate};font-size:13px;">Everything is also in the admin page.</p>
+    `),
+  };
+}
+
+/** Sent once, the day after someone entered their details at checkout but didn't pay. */
+export function checkoutFollowupEmail(d: { name: string; plan?: string | null; whatsappUrl: string }) {
+  const plan = d.plan ? planName(d.plan) : null;
+  return {
+    subject: "Still thinking about Goodson for your parents?",
+    html: wrap(`
+      <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">Hi ${escapeHtml(d.name)},</h1>
+      <p style="margin:0 0 16px;">You started subscribing${
+        plan ? ` to the <strong>${escapeHtml(plan)}</strong> plan` : ""
+      } yesterday but didn't finish. If the payment didn't go through, or you have questions first, we're happy to help.</p>
+      ${button("https://goodson.in/#plans", "Finish subscribing")}
+      <p style="margin:0 0 16px;">Prefer to talk first? <a href="${escapeHtml(
+        d.whatsappUrl
+      )}" style="color:${brand.ink};">Message us on WhatsApp</a> and we'll answer within the day.</p>
+      <p style="margin:0;color:${brand.slate};font-size:13px;">We'll only send this once.</p>
+    `),
+  };
+}
+
+/** Sent once if a paying family hasn't filled in their parents' details after a day. */
+export function intakeReminderEmail(d: { name: string; onboardingUrl: string }) {
+  return {
+    subject: "One step left: tell us about your parents",
+    html: wrap(`
+      <h1 style="margin:0 0 16px;font-size:22px;color:${brand.ink};">Hi ${escapeHtml(d.name)},</h1>
+      <p style="margin:0 0 16px;">Thank you for subscribing to Goodson. To plan the first visit or call, we need a few details about your parents: address, health, medicines and emergency contacts. It takes about 5 minutes.</p>
+      ${button(d.onboardingUrl, "Add your parents' details")}
+      <p style="margin:0;">Rather do it on a call? Just reply to this email or message us on WhatsApp.</p>
     `),
   };
 }

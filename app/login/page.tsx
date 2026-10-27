@@ -35,7 +35,7 @@ function LoginForm() {
       setError(error.message);
       return;
     }
-    router.push(params.get("next") || "/dashboard");
+    router.push(params.get("next") || "/admin");
     router.refresh();
   }
 
@@ -86,13 +86,6 @@ function LoginForm() {
             {loading ? "Logging in…" : "Log in"}
           </button>
         </form>
-
-        <p className="mt-6 text-sm text-slate">
-          New to Goodson?{" "}
-          <Link href="/signup" className="font-medium text-ink underline">
-            Create an account
-          </Link>
-        </p>
       </div>
     </main>
   );
