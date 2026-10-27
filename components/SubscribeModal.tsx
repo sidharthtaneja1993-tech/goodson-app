@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { whatsappLink } from "@/lib/whatsapp";
+import { trackReddit } from "@/lib/redditPixel";
 import {
   PLANS,
   TERMS,
@@ -93,6 +94,7 @@ export default function SubscribeModal({
     if (!plan) return;
     setState("submitting");
     setNotice(null);
+    const amountUSD = termTotalUSD(plan.monthly, term);
     try {
       // 1. Save the request (so we have their details even if they don't pay).
       const lead = await fetch("/api/waitlist", {
@@ -102,10 +104,13 @@ export default function SubscribeModal({
           ...form,
           plan: plan.id,
           billing_cycle: term.id,
-          amount_usd: termTotalUSD(plan.monthly, term),
+          amount_usd: amountUSD,
         }),
       });
       if (!lead.ok) throw new Error("failed");
+
+      // Reddit Pixel: they filled in their details (a strong buying signal)
+      trackReddit("Lead", { value: amountUSD, currency: "USD" });
 
       const details = {
         plan: plan.id,
@@ -156,6 +161,13 @@ export default function SubscribeModal({
           setState("submitting");
           const v = await post("/api/razorpay/subscription/verify", resp);
           if (v.ok) {
+            // Reddit Pixel: verified, real payment
+            trackReddit("Purchase", {
+              value: amountUSD,
+              currency: "USD",
+              itemCount: 1,
+              conversionId: resp.razorpay_payment_id,
+            });
             const vd = await v.json().catch(() => ({}));
             setOnboardingToken(vd?.onboardingToken ?? null);
             setPaidDisplay(display);
@@ -301,7 +313,15 @@ export default function SubscribeModal({
                 <span />
               )}
               <button
-                onClick={() => setStep("details")}
+                onClick={() => {
+                  // Reddit Pixel: they picked a plan and length and moved to checkout
+                  trackReddit("AddToCart", {
+                    value: termTotalUSD(plan.monthly, term),
+                    currency: "USD",
+                    itemCount: 1,
+                  });
+                  setStep("details");
+                }}
                 className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-paper hover:opacity-90"
               >
                 Continue
