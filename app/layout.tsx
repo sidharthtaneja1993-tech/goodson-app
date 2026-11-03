@@ -1,4 +1,5 @@
 import RedditPixel from '@/components/RedditPixel';
+import MicrosoftClarity from '@/components/MicrosoftClarity';
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import "@fontsource/lora/400.css";
@@ -48,6 +49,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
       <RedditPixel />
+      <MicrosoftClarity />
         {children}
         <WhatsAppButton />
         <Analytics />
