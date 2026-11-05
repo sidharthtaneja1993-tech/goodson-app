@@ -14,15 +14,30 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import StructuredData from "@/components/StructuredData";
 
-const SITE_TITLE = "Goodson — Premium concierge care for your parents in India";
+const SITE_TITLE = "Goodson — Care for elderly parents in Delhi NCR, for NRIs abroad";
 const SITE_DESCRIPTION =
-  "For NRIs abroad: dedicated concierge care for your parents in India. Medical coordination, home management, and daily support — updates you can trust.";
+  "For NRIs abroad: a trusted team caring for your elderly parents in Delhi, Gurugram & NCR. Doctor visits, hospital escorts, bank errands, home help and WhatsApp updates.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://goodson.in"),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  keywords: [
+    "elderly parent care Delhi",
+    "NRI parent care India",
+    "senior care Delhi NCR",
+    "care for parents in India while abroad",
+    "elder care Gurugram",
+    "concierge for elderly parents",
+  ],
+  // Optional: paste the code from Google Search Console's "HTML tag" method
+  // into NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION in Vercel. Not needed if you
+  // verify with the DNS method instead.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   openGraph: {
     title: "Goodson — Miles away. Never out of reach.",
     description:
@@ -48,6 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+      <StructuredData />
       <RedditPixel />
       <MicrosoftClarity />
         {children}
