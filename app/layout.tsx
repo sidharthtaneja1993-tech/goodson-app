@@ -15,6 +15,7 @@ import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import StructuredData from "@/components/StructuredData";
+import SiteTrackers from "@/components/SiteTrackers";
 
 const SITE_TITLE = "Goodson — Care for elderly parents in Delhi NCR, for NRIs abroad";
 const SITE_DESCRIPTION =
@@ -66,6 +67,7 @@ export default function RootLayout({
       <StructuredData />
       <RedditPixel />
       <MicrosoftClarity />
+      <SiteTrackers />
         {children}
         <WhatsAppButton />
         <Analytics />

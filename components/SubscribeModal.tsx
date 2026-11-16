@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { whatsappLink } from "@/lib/whatsapp";
-import { trackReddit } from "@/lib/redditPixel";
+import { trackAddToCart, trackLead, trackPurchase } from "@/lib/analytics";
 import {
   PLANS,
   TERMS,
@@ -109,8 +109,8 @@ export default function SubscribeModal({
       });
       if (!lead.ok) throw new Error("failed");
 
-      // Reddit Pixel: they filled in their details (a strong buying signal)
-      trackReddit("Lead", { value: amountUSD, currency: "USD" });
+      // Reddit, Google & Meta: they filled in their details (a strong buying signal)
+      trackLead({ value: amountUSD });
 
       const details = {
         plan: plan.id,
@@ -161,13 +161,8 @@ export default function SubscribeModal({
           setState("submitting");
           const v = await post("/api/razorpay/subscription/verify", resp);
           if (v.ok) {
-            // Reddit Pixel: verified, real payment
-            trackReddit("Purchase", {
-              value: amountUSD,
-              currency: "USD",
-              itemCount: 1,
-              conversionId: resp.razorpay_payment_id,
-            });
+            // Reddit, Google & Meta: verified, real payment
+            trackPurchase({ value: amountUSD, paymentId: resp.razorpay_payment_id });
             const vd = await v.json().catch(() => ({}));
             setOnboardingToken(vd?.onboardingToken ?? null);
             setPaidDisplay(display);
@@ -314,12 +309,8 @@ export default function SubscribeModal({
               )}
               <button
                 onClick={() => {
-                  // Reddit Pixel: they picked a plan and length and moved to checkout
-                  trackReddit("AddToCart", {
-                    value: termTotalUSD(plan.monthly, term),
-                    currency: "USD",
-                    itemCount: 1,
-                  });
+                  // Reddit, Google & Meta: they picked a plan and length and moved to checkout
+                  trackAddToCart({ value: termTotalUSD(plan.monthly, term) });
                   setStep("details");
                 }}
                 className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-paper hover:opacity-90"
