@@ -124,7 +124,7 @@ export default function KeysPage() {
               </a>
               <a
                 href="#home-plans"
-                className="rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
+                className="rounded-full bg-baby-blue px-6 py-3.5 text-sm font-semibold text-ink transition-colors duration-200 hover:bg-baby-blue-deep"
               >
                 See plans
               </a>
@@ -235,9 +235,7 @@ export default function KeysPage() {
                   href={whatsappLink(`Hi Goodson, I'm interested in the Goodson Keys "${p.name}" plan for my property.`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`mt-8 rounded-full px-5 py-3 text-center text-sm font-semibold hover:opacity-90 ${
-                    p.featured ? "bg-marigold text-ink" : "bg-ink text-paper"
-                  }`}
+                  className="mt-8 rounded-full bg-baby-blue px-5 py-3 text-center text-sm font-semibold text-ink transition-colors hover:bg-baby-blue-deep"
                 >
                   Get started
                 </a>

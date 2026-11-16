@@ -78,7 +78,7 @@ export default function Home() {
                 </button>
                 <a
                   href="#plans"
-                  className="rounded-full border border-line px-6 py-3.5 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
+                  className="rounded-full bg-baby-blue px-6 py-3.5 text-sm font-semibold text-ink transition-colors duration-200 hover:bg-baby-blue-deep"
                 >
                   See plans
                 </a>

@@ -233,9 +233,7 @@ export default function PricingSection({
 
               <button
                 onClick={() => onSelectPlan(plan.id, currency, rate)}
-                className={`mt-8 rounded-full px-5 py-3 text-sm font-semibold transition-opacity hover:opacity-90 ${
-                  plan.featured ? "bg-marigold text-ink" : "bg-ink text-paper"
-                }`}
+                className="mt-8 rounded-full bg-baby-blue px-5 py-3 text-sm font-semibold text-ink transition-colors hover:bg-baby-blue-deep"
               >
                 Subscribe now
               </button>

@@ -14,6 +14,8 @@
   --line: #E3D3B0;       /* hairline borders on light */
   --line-dark: #5C4A34;  /* hairline borders on dark */
   --charcoal: #2E2418;   /* body text on light */
+  --baby-blue: #A9D6F5;      /* baby blue - plan buttons */
+  --baby-blue-deep: #8CC5EE; /* baby blue hover */
 
   /* Punch accents - used sparingly for urgency (red) and reassurance (green) */
   --alert: #B83227;       /* brick red - emergency, urgency */
@@ -40,6 +42,8 @@
   --color-line: var(--line);
   --color-line-dark: var(--line-dark);
   --color-charcoal: var(--charcoal);
+  --color-baby-blue: var(--baby-blue);
+  --color-baby-blue-deep: var(--baby-blue-deep);
   --color-alert: var(--alert);
   --color-alert-soft: var(--alert-soft);
   --color-alert-dark: var(--alert-on-dark);
